@@ -22,7 +22,28 @@ function getColorHex(colorName) {
     return colorMap[lower] || '#ccc';
 }
 
+function loadProductsFromAdmin() {
+    const xmlProducts = JSON.parse(localStorage.getItem('adminProducts') || '[]');
+    const manualProducts = JSON.parse(localStorage.getItem('manualProducts') || '[]');
+    const allAdminProducts = [...xmlProducts, ...manualProducts];
+
+    if (allAdminProducts.length > 0) {
+        allProducts = allAdminProducts;
+        setupCategories();
+        setupBrandFilters();
+        filteredProducts = [...allProducts];
+        renderProducts();
+        document.getElementById('loadingSpinner').style.display = 'none';
+        return true;
+    }
+    return false;
+}
+
 async function fetchXMLFeed() {
+    if (loadProductsFromAdmin()) {
+        return;
+    }
+
     try {
         const response = await fetch(PROXY_URL + encodeURIComponent(XML_FEED_URL));
         const data = await response.json();
@@ -108,9 +129,7 @@ function getCategorySlug(parent) {
 function getAttribute(parent, tag, name) {
     const attrs = parent.querySelectorAll(tag);
     for (let attr of attrs) {
-        if (attr.getAttribute('name') === name) {
-            return attr.textContent.trim();
-        }
+        if (attr.getAttribute('name') === name) return attr.textContent.trim();
     }
     return '';
 }
@@ -181,18 +200,14 @@ function applyFilters() {
     let products = [...filteredProducts];
 
     const checkedBrands = Array.from(document.querySelectorAll('#brandFilters input:checked')).map(i => i.value);
-    if (checkedBrands.length > 0) {
-        products = products.filter(p => checkedBrands.includes(p.brand));
-    }
+    if (checkedBrands.length > 0) products = products.filter(p => checkedBrands.includes(p.brand));
 
     const minPrice = parseFloat(document.getElementById('minPrice').value);
     const maxPrice = parseFloat(document.getElementById('maxPrice').value);
     if (!isNaN(minPrice)) products = products.filter(p => p.minPrice >= minPrice);
     if (!isNaN(maxPrice)) products = products.filter(p => p.minPrice <= maxPrice);
 
-    if (document.getElementById('inStockOnly').checked) {
-        products = products.filter(p => p.hasStock);
-    }
+    if (document.getElementById('inStockOnly').checked) products = products.filter(p => p.hasStock);
 
     const sort = document.getElementById('sortSelect').value;
     switch (sort) {
@@ -250,8 +265,8 @@ function renderProducts(products = allProducts) {
                         ${discount > 0 ? `<span class="original-price">₺${firstVariant.regularPrice.toFixed(2)}</span>` : ''}
                     </div>
                     <div class="product-colors">
-                        ${product.colors.slice(0, 5).map(c => `<span class="color-dot" style="background:${getColorHex(c)}" title="${c}"></span>`).join('')}
-                        ${product.colors.length > 5 ? `<span class="color-dot" style="background:var(--gray-3)">+${product.colors.length - 5}</span>` : ''}
+                        ${(product.colors || []).slice(0, 5).map(c => `<span class="color-dot" style="background:${getColorHex(c)}" title="${c}"></span>`).join('')}
+                        ${(product.colors || []).length > 5 ? `<span class="color-dot" style="background:var(--gray-3)">+${product.colors.length - 5}</span>` : ''}
                     </div>
                 </div>
             </div>
@@ -263,7 +278,7 @@ function openProductModal(productId) {
     const product = allProducts.find(p => p.id === productId);
     if (!product) return;
 
-    selectedColors[productId] = product.colors[0] || '';
+    selectedColors[productId] = (product.colors || [])[0] || '';
     selectedSizes[productId] = '';
 
     const modal = document.getElementById('productModal');
@@ -276,7 +291,7 @@ function openProductModal(productId) {
         <div class="product-detail">
             <div class="product-gallery">
                 <img id="mainImage" class="main-image" src="${product.mainImage}" alt="${product.name}">
-                ${product.galleryImages.length > 0 ? `
+                ${(product.galleryImages || []).length > 0 ? `
                     <div class="gallery-thumbs">
                         <img src="${product.mainImage}" class="active" onclick="changeMainImage('${product.mainImage}', this)">
                         ${product.galleryImages.map(img => `<img src="${img}" onclick="changeMainImage('${img}', this)">`).join('')}
@@ -291,7 +306,7 @@ function openProductModal(productId) {
                     ${discount > 0 ? `<span class="detail-original-price">₺${firstVariant.regularPrice.toFixed(2)}</span><span class="product-badge badge-sale">-${discount}%</span>` : ''}
                 </div>
 
-                ${product.colors.length > 0 ? `
+                ${(product.colors || []).length > 0 ? `
                     <div class="variant-section">
                         <h4>Renk: <span id="selectedColorName">${selectedColors[productId]}</span></h4>
                         <div class="variant-options">
@@ -306,7 +321,7 @@ function openProductModal(productId) {
                 <div class="variant-section">
                     <h4>Beden</h4>
                     <div class="variant-options">
-                        ${product.sizes.map(s => {
+                        ${(product.sizes || []).map(s => {
                             const available = product.variants.some(v => v.bed === s && (selectedColors[productId] ? v.renk === selectedColors[productId] : true) && v.stockStatus === 'instock');
                             return `<button class="variant-btn ${!available ? 'disabled' : ''}"
                                          onclick="${available ? `selectSize('${productId}', '${s}')` : ''}">${s}</button>`;
