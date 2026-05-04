@@ -108,6 +108,7 @@ function showPage(page, el) {
     if (page === 'categories') loadCategoriesAdmin();
     if (page === 'feeds') loadXmlSettings();
     if (page === 'settings') loadPaymentSettings();
+    if (page === 'orders') { currentOrderPage = 1; renderOrders(); }
 }
 
 // ===================== TOAST =====================
@@ -250,6 +251,7 @@ function initEditors() {
 function loadDashboard() {
     const allProducts = getAllProducts();
     const feeds = getFeeds();
+    const orders = getOrders();
     const brands = new Set(allProducts.map(p => p.brand)).size;
     const inStock = allProducts.filter(p => p.hasStock).length;
     const totalStock = allProducts.reduce((sum, p) => sum + (p.stockQty || 0), 0);
@@ -262,7 +264,7 @@ function loadDashboard() {
     document.getElementById('statTotalStock').textContent = totalStock;
     document.getElementById('statFeedCount').textContent = feeds.length;
     document.getElementById('statBrands').textContent = brands;
-    document.getElementById('statOrders').textContent = cart.reduce((s, i) => s + i.quantity, 0);
+    document.getElementById('statOrders').textContent = orders.length;
     document.getElementById('statMembers').textContent = members.length;
     document.getElementById('statBlogPosts').textContent = blogs.length;
 
@@ -1148,6 +1150,10 @@ function exportData() {
         shippingSettings: getShippingSettings(), seoSettings: getSEO(),
         contactSettings: getContactSettings(), promotions: getPromotions(),
         categories: getCategories(), adminLang: getCurrentLang(),
+        paymentSettings: getPaymentSettings(), bankAccounts: getBankAccounts(),
+        paytrSettings: getPaytrSettings(), iyzicoSettings: getIyzicoSettings(),
+        webhookSettings: getWebhookSettings(), xmlSettings: getXmlSettings(),
+        orders: getOrders(),
         exportDate: new Date().toISOString()
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -1181,6 +1187,12 @@ function importData(e) {
             if (data.contactSettings) saveContactSettings(data.contactSettings);
             if (data.promotions) savePromotions(data.promotions);
             if (data.categories) saveCategories(data.categories);
+            if (data.paymentSettings) localStorage.setItem('paymentSettings', JSON.stringify(data.paymentSettings));
+            if (data.bankAccounts) localStorage.setItem('bankAccounts', JSON.stringify(data.bankAccounts));
+            if (data.paytrSettings) localStorage.setItem('paytrSettings', JSON.stringify(data.paytrSettings));
+            if (data.iyzicoSettings) localStorage.setItem('iyzicoSettings', JSON.stringify(data.iyzicoSettings));
+            if (data.webhookSettings) localStorage.setItem('webhookSettings', JSON.stringify(data.webhookSettings));
+            if (data.orders) saveOrders(data.orders);
             showToast('Veriler içe aktarıldı!');
             loadDashboard();
         } catch (error) { showToast('Geçersiz dosya!', 'error'); }
@@ -1198,7 +1210,7 @@ function clearAllManualProducts() {
 function resetAllData() {
     if (!confirm('TÜM VERİLER SİLİNECEK! Emin misiniz?')) return;
     if (!confirm('Gerçekten emin misiniz?')) return;
-    const keys = ['xmlFeeds', 'adminProducts', 'manualProducts', 'admins', 'banners', 'campaigns', 'blogPosts', 'contentPages', 'members', 'shippingSettings', 'seoSettings', 'contactSettings', 'promotions', 'categories', 'cart', 'adminPassword', 'lastFeedLoad'];
+    const keys = ['xmlFeeds', 'adminProducts', 'manualProducts', 'admins', 'banners', 'campaigns', 'blogPosts', 'contentPages', 'members', 'shippingSettings', 'seoSettings', 'contactSettings', 'promotions', 'categories', 'cart', 'adminPassword', 'lastFeedLoad', 'paymentSettings', 'bankAccounts', 'paytrSettings', 'iyzicoSettings', 'webhookSettings', 'xmlSettings', 'orders'];
     keys.forEach(k => localStorage.removeItem(k));
     showToast('Tüm veriler sıfırlandı!', 'info');
     location.reload();
@@ -1578,10 +1590,7 @@ function getTextSafe(el, selectors) {
 // ===================== PAYMENT SETTINGS =====================
 function getPaymentSettings() {
     return JSON.parse(localStorage.getItem('paymentSettings') || JSON.stringify({
-        whatsapp: true,
-        email: true,
-        door: true,
-        bank: false
+        whatsapp: true, email: true, door: true, eft: true, paytr: false, iyzico: false
     }));
 }
 
@@ -1590,7 +1599,9 @@ function savePaymentSettings() {
         whatsapp: document.getElementById('payWhatsapp')?.checked || false,
         email: document.getElementById('payEmail')?.checked || false,
         door: document.getElementById('payDoor')?.checked || false,
-        bank: document.getElementById('payBank')?.checked || false
+        eft: document.getElementById('payEft')?.checked || false,
+        paytr: document.getElementById('payPaytr')?.checked || false,
+        iyzico: document.getElementById('payIyzico')?.checked || false
     };
     localStorage.setItem('paymentSettings', JSON.stringify(settings));
     showToast('Ödeme ayarları kaydedildi!');
@@ -1598,14 +1609,391 @@ function savePaymentSettings() {
 
 function loadPaymentSettings() {
     const settings = getPaymentSettings();
-    const payWhatsapp = document.getElementById('payWhatsapp');
-    const payEmail = document.getElementById('payEmail');
-    const payDoor = document.getElementById('payDoor');
-    const payBank = document.getElementById('payBank');
-    if (payWhatsapp) payWhatsapp.checked = settings.whatsapp;
-    if (payEmail) payEmail.checked = settings.email;
-    if (payDoor) payDoor.checked = settings.door;
-    if (payBank) payBank.checked = settings.bank;
+    const el = (id) => document.getElementById(id);
+    if (el('payWhatsapp')) el('payWhatsapp').checked = settings.whatsapp;
+    if (el('payEmail')) el('payEmail').checked = settings.email;
+    if (el('payDoor')) el('payDoor').checked = settings.door;
+    if (el('payEft')) el('payEft').checked = settings.eft;
+    if (el('payPaytr')) el('payPaytr').checked = settings.paytr;
+    if (el('payIyzico')) el('payIyzico').checked = settings.iyzico;
+    loadBankAccounts();
+    loadPaytrSettings();
+    loadIyzicoSettings();
+    loadWebhookSettings();
+}
+
+// ===================== BANK ACCOUNTS =====================
+function getBankAccounts() { return JSON.parse(localStorage.getItem('bankAccounts') || '[]'); }
+function saveBankAccounts(b) { localStorage.setItem('bankAccounts', JSON.stringify(b)); }
+
+function addBankAccount() {
+    const name = document.getElementById('bankName').value.trim();
+    const holder = document.getElementById('bankHolder').value.trim();
+    const iban = document.getElementById('bankIban').value.trim();
+    const accountNo = document.getElementById('bankAccountNo').value.trim();
+    const swift = document.getElementById('bankSwift').value.trim();
+    if (!name || !iban) { showToast('Banka adı ve IBAN gerekli!', 'error'); return; }
+    const accounts = getBankAccounts();
+    accounts.push({ id: Date.now().toString(), name, holder, iban, accountNo, swift, active: true });
+    saveBankAccounts(accounts);
+    ['bankName', 'bankHolder', 'bankIban', 'bankAccountNo', 'bankSwift'].forEach(id => document.getElementById(id).value = '');
+    loadBankAccounts();
+    showToast('Banka hesabı eklendi!');
+}
+
+function loadBankAccounts() {
+    const accounts = getBankAccounts();
+    const container = document.getElementById('bankAccountsList');
+    if (!container) return;
+    container.innerHTML = accounts.map((a, i) => `
+        <div class="feed-item"><div class="feed-info"><div class="name">${a.name}</div><div>IBAN: ${a.iban}</div>${a.holder ? `<div>Hesap sahibi: ${a.holder}</div>` : ''}${a.accountNo ? `<div>Hesap no: ${a.accountNo}</div>` : ''}${a.swift ? `<div>SWIFT: ${a.swift}</div>` : ''}</div><div class="feed-actions"><button class="btn-delete-sm" onclick="deleteBankAccount(${i})">Sil</button></div></div>
+    `).join('') || '<p style="color:var(--gray-2);text-align:center;padding:20px">Banka hesabı eklenmemiş.</p>';
+}
+
+function deleteBankAccount(index) {
+    if (!confirm('Bu banka hesabını silmek istediğinize emin misiniz?')) return;
+    const accounts = getBankAccounts();
+    accounts.splice(index, 1);
+    saveBankAccounts(accounts);
+    loadBankAccounts();
+    showToast('Banka hesabı silindi!');
+}
+
+// ===================== PAYTR SETTINGS =====================
+function getPaytrSettings() { return JSON.parse(localStorage.getItem('paytrSettings') || '{}'); }
+function savePaytrSettings() {
+    const settings = {
+        link: document.getElementById('paytrLink')?.value.trim() || '',
+        merchantNo: document.getElementById('paytrMerchantNo')?.value.trim() || ''
+    };
+    localStorage.setItem('paytrSettings', JSON.stringify(settings));
+    showToast('PayTR ayarları kaydedildi!');
+}
+function loadPaytrSettings() {
+    const s = getPaytrSettings();
+    const link = document.getElementById('paytrLink');
+    const merchant = document.getElementById('paytrMerchantNo');
+    if (link) link.value = s.link || '';
+    if (merchant) merchant.value = s.merchantNo || '';
+}
+
+// ===================== IYZICO SETTINGS =====================
+function getIyzicoSettings() { return JSON.parse(localStorage.getItem('iyzicoSettings') || '{}'); }
+function saveIyzicoSettings() {
+    const settings = {
+        link: document.getElementById('iyzicoLink')?.value.trim() || '',
+        apiKey: document.getElementById('iyzicoApiKey')?.value.trim() || ''
+    };
+    localStorage.setItem('iyzicoSettings', JSON.stringify(settings));
+    showToast('Iyzico ayarları kaydedildi!');
+}
+function loadIyzicoSettings() {
+    const s = getIyzicoSettings();
+    const link = document.getElementById('iyzicoLink');
+    const key = document.getElementById('iyzicoApiKey');
+    if (link) link.value = s.link || '';
+    if (key) key.value = s.apiKey || '';
+}
+
+// ===================== WEBHOOK SETTINGS =====================
+function getWebhookSettings() { return JSON.parse(localStorage.getItem('webhookSettings') || '{}'); }
+function saveWebhookSettings() {
+    const settings = {
+        url: document.getElementById('webhookUrl')?.value.trim() || '',
+        secret: document.getElementById('webhookSecret')?.value.trim() || ''
+    };
+    localStorage.setItem('webhookSettings', JSON.stringify(settings));
+    showToast('Webhook ayarları kaydedildi!');
+}
+function loadWebhookSettings() {
+    const s = getWebhookSettings();
+    const url = document.getElementById('webhookUrl');
+    const secret = document.getElementById('webhookSecret');
+    if (url) url.value = s.url || '';
+    if (secret) secret.value = s.secret || '';
+}
+
+async function testWebhook() {
+    const settings = getWebhookSettings();
+    if (!settings.url) { showToast('Webhook URL giriniz!', 'error'); return; }
+    showToast('Webhook test ediliyor...', 'info');
+    try {
+        const response = await fetch(settings.url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Webhook-Secret': settings.secret || '' },
+            body: JSON.stringify({ event: 'test', timestamp: new Date().toISOString(), message: 'GymTayt webhook testi' })
+        });
+        if (response.ok || response.status === 200 || response.status === 201 || response.status === 204) {
+            showToast('Webhook testi başarılı!');
+        } else {
+            showToast('Webhook hatası: ' + response.status, 'error');
+        }
+    } catch (error) {
+        showToast('Webhook bağlantı hatası: ' + error.message, 'error');
+    }
+}
+
+async function sendOrderWebhook(order) {
+    const settings = getWebhookSettings();
+    if (!settings.url) return;
+    try {
+        await fetch(settings.url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Webhook-Secret': settings.secret || '' },
+            body: JSON.stringify({
+                event: 'order_created',
+                order: order,
+                timestamp: new Date().toISOString()
+            })
+        });
+    } catch (error) {
+        console.error('Webhook gönderim hatası:', error);
+    }
+}
+
+// ===================== ORDERS =====================
+let currentOrderPage = 1;
+const orderPageSize = 20;
+
+function getOrders() { return JSON.parse(localStorage.getItem('orders') || '[]'); }
+function saveOrders(o) { localStorage.setItem('orders', JSON.stringify(o)); }
+
+function renderOrders() {
+    const orders = getOrders();
+    const statusFilter = document.getElementById('orderFilterStatus')?.value || '';
+    const paymentFilter = document.getElementById('orderFilterPayment')?.value || '';
+
+    let filtered = orders.filter(o => {
+        if (statusFilter && o.status !== statusFilter) return false;
+        if (paymentFilter && o.paymentMethod !== paymentFilter) return false;
+        return true;
+    });
+
+    filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    const totalPages = Math.ceil(filtered.length / orderPageSize);
+    if (currentOrderPage > totalPages) currentOrderPage = 1;
+    const start = (currentOrderPage - 1) * orderPageSize;
+    const pageOrders = filtered.slice(start, start + orderPageSize);
+
+    const totalRevenue = filtered.reduce((s, o) => s + (o.total || 0), 0);
+    const pendingCount = filtered.filter(o => o.status === 'pending').length;
+    const paidCount = filtered.filter(o => o.status === 'paid').length;
+
+    const statsContainer = document.getElementById('orderStats');
+    if (statsContainer) {
+        statsContainer.innerHTML = `
+            <div class="order-stats-grid">
+                <div class="order-stat-card"><span>${filtered.length}</span><p>Toplam Sipariş</p></div>
+                <div class="order-stat-card"><span>₺${totalRevenue.toFixed(2)}</span><p>Toplam Gelir</p></div>
+                <div class="order-stat-card warning"><span>${pendingCount}</span><p>Bekleyen</p></div>
+                <div class="order-stat-card success"><span>${paidCount}</span><p>Ödenen</p></div>
+            </div>
+        `;
+    }
+
+    const tbody = document.getElementById('ordersTableBody');
+    tbody.innerHTML = pageOrders.map((o, i) => `
+        <tr onclick="viewOrderDetail('${o.id}')" style="cursor:pointer">
+            <td><strong>${o.id}</strong></td>
+            <td>${o.customer?.name || '-'}<br><small style="color:var(--gray-2)">${o.customer?.phone || ''}</small></td>
+            <td>${new Date(o.date).toLocaleDateString('tr-TR')}<br><small style="color:var(--gray-2)">${new Date(o.date).toLocaleTimeString('tr-TR', {hour:'2-digit',minute:'2-digit'})}</small></td>
+            <td><span class="payment-badge payment-${o.paymentMethod}">${getPaymentLabel(o.paymentMethod)}</span></td>
+            <td><strong>₺${(o.total || 0).toFixed(2)}</strong></td>
+            <td><select class="order-status-select" onclick="event.stopPropagation()" onchange="updateOrderStatus('${o.id}',this.value)"><option value="pending" ${o.status==='pending'?'selected':''}>Beklemede</option><option value="paid" ${o.status==='paid'?'selected':''}>Ödendi</option><option value="shipped" ${o.status==='shipped'?'selected':''}>Kargoda</option><option value="delivered" ${o.status==='delivered'?'selected':''}>Teslim Edildi</option><option value="cancelled" ${o.status==='cancelled'?'selected':''}>İptal</option></select></td>
+            <td><div class="action-btns"><button class="btn-delete" onclick="event.stopPropagation();deleteOrder('${o.id}')">Sil</button></div></td>
+        </tr>
+    `).join('') || '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--gray-2)">Sipariş bulunamadı.</td></tr>';
+
+    const pagination = document.getElementById('ordersPagination');
+    if (totalPages <= 1) { if (pagination) pagination.innerHTML = ''; return; }
+    if (pagination) {
+        let html = '';
+        for (let i = 1; i <= totalPages; i++) {
+            html += `<button class="${i === currentOrderPage ? 'active' : ''}" onclick="goToOrderPage(${i})">${i}</button>`;
+        }
+        pagination.innerHTML = html;
+    }
+}
+
+function goToOrderPage(page) { currentOrderPage = page; renderOrders(); }
+
+function viewOrderDetail(orderId) {
+    const orders = getOrders();
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    const itemsHtml = (order.items || []).map(item => `<div style="padding:8px 0;border-bottom:1px solid var(--gray-4)"><strong>${item.name}</strong> (${item.renk || ''} / ${item.bed || ''}) x${item.quantity} - ₺${(item.price * item.quantity).toFixed(2)}</div>`).join('');
+
+    const receiptHtml = order.receipt ? `<div style="margin-top:15px"><h4>Ödeme Dekontu</h4><img src="${order.receipt}" style="max-width:300px;border-radius:8px;margin-top:10px"></div>` : '';
+
+    const detailHtml = `
+        <div style="padding:20px">
+            <h3>Sipariş: ${order.id}</h3>
+            <p style="color:var(--gray-2);margin:5px 0 15px">${new Date(order.date).toLocaleString('tr-TR')}</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:20px">
+                <div><strong>Müşteri:</strong><br>${order.customer?.name || '-'}<br>${order.customer?.phone || ''}<br>${order.customer?.email || ''}</div>
+                <div><strong>Adres:</strong><br>${order.customer?.address || '-'}<br>${order.customer?.city || ''}</div>
+                <div><strong>Ödeme:</strong><br>${getPaymentLabel(order.paymentMethod)}</div>
+                <div><strong>Durum:</strong><br><span class="order-status-badge status-${order.status}">${getStatusLabel(order.status)}</span></div>
+            </div>
+            <h4>Ürünler</h4>
+            ${itemsHtml}
+            <div style="text-align:right;margin-top:15px;font-size:1.2rem;font-weight:700">Toplam: ₺${(order.total || 0).toFixed(2)}</div>
+            ${order.note ? `<div style="margin-top:15px"><strong>Not:</strong> ${order.note}</div>` : ''}
+            ${receiptHtml}
+            <div style="margin-top:20px;display:flex;gap:10px"><button class="btn-primary" onclick="exportSingleOrderCsv('${order.id}')">CSV İndir</button><button class="btn-secondary" onclick="sendOrderToWebhook('${order.id}')">Webhook Gönder</button></div>
+        </div>
+    `;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal active';
+    modal.innerHTML = `<div class="modal-content" style="max-width:700px">${detailHtml}<button class="close-modal" onclick="this.closest('.modal').remove()">&times;</button></div>`;
+    modal.onclick = function(e) { if (e.target === this) this.remove(); };
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+}
+
+function updateOrderStatus(orderId, status) {
+    const orders = getOrders();
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+    order.status = status;
+    saveOrders(orders);
+    showToast(`Sipariş durumu güncellendi: ${getStatusLabel(status)}`);
+    loadDashboard();
+}
+
+function deleteOrder(orderId) {
+    if (!confirm('Bu siparişi silmek istediğinize emin misiniz?')) return;
+    const orders = getOrders().filter(o => o.id !== orderId);
+    saveOrders(orders);
+    renderOrders();
+    loadDashboard();
+    showToast('Sipariş silindi!');
+}
+
+function sendOrderToWebhook(orderId) {
+    const orders = getOrders();
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+    sendOrderWebhook(order);
+    showToast('Webhook gönderildi!');
+}
+
+function getStatusLabel(status) {
+    return { pending: 'Beklemede', paid: 'Ödendi', shipped: 'Kargoda', delivered: 'Teslim Edildi', cancelled: 'İptal' }[status] || status;
+}
+
+function getPaymentLabel(method) {
+    return { whatsapp: 'WhatsApp', email: 'E-posta', door: 'Kapıda Ödeme', eft: 'EFT/Havale', paytr: 'PayTR', iyzico: 'Iyzico' }[method] || method;
+}
+
+// ===================== ACCOUNTING EXPORT =====================
+function exportOrdersCsv(format) {
+    const orders = getOrders().filter(o => o.status !== 'cancelled');
+    if (orders.length === 0) { showToast('Dışa aktarılacak sipariş yok!', 'error'); return; }
+
+    let csv = '';
+
+    if (format === 'parashut') {
+        csv = 'Tarih,Fis Tipi,Belge No,Musteri,Aciklama,Tutar,KDV Orani,KDV Tutari,Toplam,Odeme Yontemi\n';
+        orders.forEach(o => {
+            const kdvRate = 18;
+            const kdvAmount = (o.total * kdvRate) / (100 + kdvRate);
+            const totalWithoutKdv = o.total - kdvAmount;
+            const items = (o.items || []).map(i => `${i.name} (${i.renk}/${i.bed})`).join(', ');
+            csv += `${new Date(o.date).toLocaleDateString('tr-TR')},SATIS,${o.id},"${o.customer?.name || '-'}","${items}",${totalWithoutKdv.toFixed(2)},${kdvRate},${kdvAmount.toFixed(2)},${o.total.toFixed(2)},${getPaymentLabel(o.paymentMethod)}\n`;
+        });
+    } else if (format === 'logo') {
+        csv = 'FaturaNo,Tarih,MusteriAdi,VergiNo,VergiDairesi,Aciklama,UrunAdi,Miktar,BirimFiyat,Tutar,KDV,Toplam\n';
+        orders.forEach(o => {
+            (o.items || []).forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                const kdv = itemTotal * 0.18 / 1.18;
+                csv += `${o.id},${new Date(o.date).toLocaleDateString('tr-TR')},"${o.customer?.name || '-'}",,,${item.name} (${item.renk}/${item.bed}),${item.quantity},${item.price.toFixed(2)},${itemTotal.toFixed(2)},${kdv.toFixed(2)},${itemTotal.toFixed(2)}\n`;
+            });
+        });
+    } else if (format === 'mikro') {
+        csv = 'EvrakTipi,EvrakNo,Tarih,CariKod,CariUnvan,MalKod,Miktar,BirimFiyat,Toplam,KDV,OdemeTipi\n';
+        orders.forEach(o => {
+            (o.items || []).forEach(item => {
+                csv += `SATIS,${o.id},${new Date(o.date).toLocaleDateString('tr-TR')},, "${o.customer?.name || '-'}",${item.productId || ''},${item.quantity},${item.price.toFixed(2)},${(item.price * item.quantity).toFixed(2)},${(item.price * item.quantity * 0.18).toFixed(2)},${o.paymentMethod}\n`;
+            });
+        });
+    }
+
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `siparisler-${format}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(`${format.toUpperCase()} formatında ${orders.length} sipariş dışa aktarıldı!`);
+}
+
+function exportOrdersXml() {
+    const orders = getOrders().filter(o => o.status !== 'cancelled');
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<Orders>\n';
+    orders.forEach(o => {
+        xml += `  <Order>\n`;
+        xml += `    <OrderNo>${o.id}</OrderNo>\n`;
+        xml += `    <Date>${o.date}</Date>\n`;
+        xml += `    <Customer>\n`;
+        xml += `      <Name>${o.customer?.name || ''}</Name>\n`;
+        xml += `      <Phone>${o.customer?.phone || ''}</Phone>\n`;
+        xml += `      <Email>${o.customer?.email || ''}</Email>\n`;
+        xml += `      <Address>${o.customer?.address || ''}</Address>\n`;
+        xml += `    </Customer>\n`;
+        xml += `    <PaymentMethod>${o.paymentMethod || ''}</PaymentMethod>\n`;
+        xml += `    <Status>${o.status || 'pending'}</Status>\n`;
+        xml += `    <Items>\n`;
+        (o.items || []).forEach(item => {
+            xml += `      <Item>\n`;
+            xml += `        <ProductId>${item.productId || ''}</ProductId>\n`;
+            xml += `        <Name>${item.name || ''}</Name>\n`;
+            xml += `        <Variant>${item.renk || ''} / ${item.bed || ''}</Variant>\n`;
+            xml += `        <Quantity>${item.quantity || 1}</Quantity>\n`;
+            xml += `        <Price>${item.price || 0}</Price>\n`;
+            xml += `        <Total>${(item.price * item.quantity).toFixed(2)}</Total>\n`;
+            xml += `      </Item>\n`;
+        });
+        xml += `    </Items>\n`;
+        xml += `    <Total>${(o.total || 0).toFixed(2)}</Total>\n`;
+        if (o.note) xml += `    <Note>${o.note}</Note>\n`;
+        xml += `  </Order>\n`;
+    });
+    xml += '</Orders>';
+
+    const blob = new Blob([xml], { type: 'application/xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `siparisler-muhasebe-${new Date().toISOString().slice(0, 10)}.xml`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Muhasebe XML dosyası indirildi!');
+}
+
+function exportSingleOrderCsv(orderId) {
+    const orders = getOrders();
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    let csv = 'SiparisNo,Tarih,Musteri,Telefon,Email,Adres,Urun,Renk,Beden,Miktar,Fiyat,Toplam,Odeme,Durum\n';
+    (order.items || []).forEach(item => {
+        csv += `${order.id},${new Date(order.date).toLocaleDateString('tr-TR')},"${order.customer?.name || ''}","${order.customer?.phone || ''}","${order.customer?.email || ''}","${order.customer?.address || ''}","${item.name}","${item.renk || ''}","${item.bed || ''}",${item.quantity},${item.price.toFixed(2)},${(item.price * item.quantity).toFixed(2)},${getPaymentLabel(order.paymentMethod)},${getStatusLabel(order.status)}\n`;
+    });
+
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `siparis-${orderId}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Sipariş CSV dosyası indirildi!');
 }
 
 initAdmin();

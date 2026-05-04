@@ -514,6 +514,7 @@ function checkout() {
 function showCartItems() {
     document.getElementById('checkoutSection').style.display = 'none';
     document.getElementById('cartFooter').style.display = 'block';
+    document.getElementById('paymentInfoSection').style.display = 'none';
 }
 
 function showCheckout() {
@@ -534,18 +535,80 @@ function showCheckout() {
     if (paymentSettings.door) {
         html += `<label class="payment-method-option" onclick="selectPayment('door')"><input type="radio" name="paymentMethod" value="door"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Kapıda Ödeme</span></label>`;
     }
-    if (paymentSettings.bank) {
-        html += `<label class="payment-method-option" onclick="selectPayment('bank')"><input type="radio" name="paymentMethod" value="bank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg><span>EFT/Havale</span></label>`;
+    if (paymentSettings.eft) {
+        html += `<label class="payment-method-option" onclick="selectPayment('eft')"><input type="radio" name="paymentMethod" value="eft"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg><span>EFT/Havale</span></label>`;
+    }
+    if (paymentSettings.paytr) {
+        html += `<label class="payment-method-option" onclick="selectPayment('paytr')"><input type="radio" name="paymentMethod" value="paytr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><span>PayTR ile Öde</span></label>`;
+    }
+    if (paymentSettings.iyzico) {
+        html += `<label class="payment-method-option" onclick="selectPayment('iyzico')"><input type="radio" name="paymentMethod" value="iyzico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Iyzico ile Öde</span></label>`;
     }
 
     container.innerHTML = html || '<p style="color:var(--gray-2);font-size:0.9rem">Ödeme yöntemi bulunmuyor.</p>';
     document.getElementById('checkoutSection').style.display = 'block';
     document.getElementById('cartFooter').style.display = 'none';
+    document.getElementById('paymentInfoSection').style.display = 'none';
+    selectPayment('whatsapp');
 }
 
 function selectPayment(method) {
     document.querySelectorAll('.payment-method-option').forEach(el => el.classList.remove('selected'));
-    document.querySelector(`input[name="paymentMethod"][value="${method}"]`).closest('.payment-method-option').classList.add('selected');
+    const radio = document.querySelector(`input[name="paymentMethod"][value="${method}"]`);
+    if (radio) {
+        radio.checked = true;
+        radio.closest('.payment-method-option').classList.add('selected');
+    }
+
+    const infoSection = document.getElementById('paymentInfoSection');
+    if (method === 'eft') {
+        const accounts = JSON.parse(localStorage.getItem('bankAccounts') || '[]');
+        if (accounts.length === 0) {
+            infoSection.innerHTML = '<div class="bank-info-card"><p style="color:var(--gray-2)">Banka hesap bilgisi eklenmemiş. Lütfen WhatsApp üzerinden iletişime geçin.</p></div>';
+        } else {
+            infoSection.innerHTML = '<h4>Banka Hesap Bilgileri</h4><p class="bank-info-note">Lütfen aşağıdaki hesaplardan birine ödemenizi yapın. Dekont yüklemeyi unutmayın!</p>' + accounts.filter(a => a.active).map(a => `
+                <div class="bank-info-card">
+                    <div class="bank-name">${a.name}</div>
+                    <div class="bank-detail"><span>IBAN:</span> <span class="bank-iban" id="iban-${a.id}">${a.iban}</span> <button class="btn-copy" onclick="copyIban('iban-${a.id}')">Kopyala</button></div>
+                    ${a.holder ? `<div class="bank-detail"><span>Hesap Sahibi:</span> ${a.holder}</div>` : ''}
+                    ${a.accountNo ? `<div class="bank-detail"><span>Hesap No:</span> ${a.accountNo}</div>` : ''}
+                    ${a.swift ? `<div class="bank-detail"><span>SWIFT:</span> ${a.swift}</div>` : ''}
+                </div>
+            `).join('') + '<div style="margin-top:15px"><label class="form-group" style="margin:0"><strong>Dekont Yükle</strong><input type="file" id="receiptUpload" accept="image/*" onchange="handleReceiptUpload(this)" style="margin-top:8px"><img id="receiptPreview" class="receipt-preview" style="display:none"></label></div>';
+        }
+        infoSection.style.display = 'block';
+    } else if (method === 'paytr') {
+        const paytr = JSON.parse(localStorage.getItem('paytrSettings') || '{}');
+        infoSection.innerHTML = paytr.link ? `<div class="bank-info-card info"><p>PayTR ödeme sayfasına yönlendirileceksiniz. Siparişi gönderdikten sonra ödeme sayfası açılacaktır.</p>${paytr.merchantNo ? `<p style="margin-top:8px;font-size:0.85rem;color:var(--gray-2)">Mağaza No: ${paytr.merchantNo}</p>` : ''}</div>` : '<div class="bank-info-card warning"><p>PayTR ödeme linki yapılandırılmamış. Lütfen WhatsApp üzerinden iletişime geçin.</p></div>';
+        infoSection.style.display = 'block';
+    } else if (method === 'iyzico') {
+        const iyzico = JSON.parse(localStorage.getItem('iyzicoSettings') || '{}');
+        infoSection.innerHTML = iyzico.link ? `<div class="bank-info-card info"><p>Iyzico ödeme sayfasına yönlendirileceksiniz. Siparişi gönderdikten sonra ödeme sayfası açılacaktır.</p></div>` : '<div class="bank-info-card warning"><p>Iyzico ödeme linki yapılandırılmamış. Lütfen WhatsApp üzerinden iletişime geçin.</p></div>';
+        infoSection.style.display = 'block';
+    } else {
+        infoSection.style.display = 'none';
+    }
+}
+
+function copyIban(id) {
+    const iban = document.getElementById(id);
+    navigator.clipboard.writeText(iban.textContent).then(() => showToast('IBAN kopyalandı!'));
+}
+
+let uploadedReceipt = null;
+function handleReceiptUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { showToast('Sadece görsel dosyası seçebilirsiniz!', 'error'); return; }
+    if (file.size > 5 * 1024 * 1024) { showToast('Dekont boyutu 5MB\'dan küçük olmalı!', 'error'); return; }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        uploadedReceipt = e.target.result;
+        const preview = document.getElementById('receiptPreview');
+        if (preview) { preview.src = e.target.result; preview.style.display = 'block'; }
+        showToast('Dekont yüklendi!');
+    };
+    reader.readAsDataURL(file);
 }
 
 function completeOrder() {
@@ -577,12 +640,17 @@ function completeOrder() {
         items: cart.map(i => ({ ...i })),
         total,
         note,
-        status: 'pending'
+        status: (paymentMethod === 'paytr' || paymentMethod === 'iyzico') ? 'pending' : paymentMethod === 'eft' ? 'awaiting_payment' : 'pending',
+        receipt: uploadedReceipt || null
     };
 
     const orders = JSON.parse(localStorage.getItem('orders') || '[]');
     orders.push(order);
     localStorage.setItem('orders', JSON.stringify(orders));
+
+    if (window.sendOrderWebhook) {
+        window.sendOrderWebhook(order);
+    }
 
     switch (paymentMethod) {
         case 'whatsapp':
@@ -593,11 +661,32 @@ function completeOrder() {
             break;
         case 'email':
             const mailSubject = `Sipariş #${order.id}`;
-            window.location.href = `mailto:${contact.email || ''}?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(orderSummary)}`;
+            const contactEmail = JSON.parse(localStorage.getItem('contactSettings') || '{}');
+            window.location.href = `mailto:${contactEmail.email || ''}?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(orderSummary)}`;
+            break;
+        case 'eft':
+            alert('Siparişiniz alındı!\n\nLütfen banka hesabına ödemenizi yapın ve dekont yükleyin.\n\n' + orderSummary);
+            break;
+        case 'paytr':
+            const paytr = JSON.parse(localStorage.getItem('paytrSettings') || '{}');
+            if (paytr.link) {
+                const paytrUrl = paytr.link.includes('?') ? `${paytr.link}&amount=${total.toFixed(2)}&order_id=${order.id}` : `${paytr.link}?amount=${total.toFixed(2)}&order_id=${order.id}`;
+                window.open(paytrUrl, '_blank');
+            } else {
+                alert('PayTR ödeme linki yapılandırılmamış. Sipariş kaydedildi, ödeme için WhatsApp üzerinden iletişime geçin.');
+            }
+            break;
+        case 'iyzico':
+            const iyzico = JSON.parse(localStorage.getItem('iyzicoSettings') || '{}');
+            if (iyzico.link) {
+                const iyzicoUrl = iyzico.link.includes('?') ? `${iyzico.link}&amount=${total.toFixed(2)}&order_id=${order.id}` : `${iyzico.link}?amount=${total.toFixed(2)}&order_id=${order.id}`;
+                window.open(iyzicoUrl, '_blank');
+            } else {
+                alert('Iyzico ödeme linki yapılandırılmamış. Sipariş kaydedildi, ödeme için WhatsApp üzerinden iletişime geçin.');
+            }
             break;
         case 'door':
-        case 'bank':
-            alert('Siparişiniz alındı!\n\n' + orderSummary);
+            alert('Siparişiniz alındı!\n\nKapıda ödeme tercih ettiniz.\n\n' + orderSummary);
             break;
     }
 
@@ -606,16 +695,17 @@ function completeOrder() {
     updateCartCount();
     showCartItems();
     toggleCart();
+    uploadedReceipt = null;
     showToast('Siparişiniz gönderildi!');
 }
 
 function getPaymentLabel(method) {
-    return { whatsapp: 'WhatsApp', email: 'E-posta', door: 'Kapıda Ödeme', bank: 'EFT/Havale' }[method] || method;
+    return { whatsapp: 'WhatsApp', email: 'E-posta', door: 'Kapıda Ödeme', eft: 'EFT/Havale', paytr: 'PayTR', iyzico: 'Iyzico' }[method] || method;
 }
 
 function getPaymentSettings() {
     return JSON.parse(localStorage.getItem('paymentSettings') || JSON.stringify({
-        whatsapp: true, email: true, door: true, bank: false
+        whatsapp: true, email: true, door: true, eft: true, paytr: false, iyzico: false
     }));
 }
 

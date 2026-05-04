@@ -657,3 +657,67 @@ input:focus, textarea:focus, select:focus { border-color: var(--primary); }
     .form-grid { grid-template-columns: 1fr; }
     .products-table-wrap { overflow-x: auto; }
 }
+
+/* Order Management */
+.order-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+.order-stat-card {
+    background: var(--white);
+    border-radius: var(--radius-sm);
+    padding: 15px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    border-left: 3px solid var(--primary);
+}
+.order-stat-card.warning { border-left-color: var(--warning); }
+.order-stat-card.success { border-left-color: var(--success); }
+.order-stat-card span {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark);
+}
+.order-stat-card p {
+    font-size: 0.8rem;
+    color: var(--gray-2);
+    margin-top: 5px;
+}
+.payment-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.payment-whatsapp { background: rgba(37,211,102,0.1); color: #25d366; }
+.payment-email { background: rgba(108,92,231,0.1); color: var(--primary); }
+.payment-door { background: rgba(253,203,110,0.1); color: #e17055; }
+.payment-eft { background: rgba(0,206,201,0.1); color: var(--secondary); }
+.payment-paytr { background: rgba(0,184,148,0.1); color: var(--success); }
+.payment-iyzico { background: rgba(253,121,168,0.1); color: var(--accent); }
+.order-status-select {
+    padding: 6px 10px;
+    border: 1px solid var(--gray-4);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    cursor: pointer;
+    outline: none;
+}
+.order-status-select:focus { border-color: var(--primary); }
+.order-status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+.status-pending { background: rgba(253,203,110,0.1); color: #e17055; }
+.status-paid { background: rgba(0,184,148,0.1); color: var(--success); }
+.status-shipped { background: rgba(108,92,231,0.1); color: var(--primary); }
+.status-delivered { background: rgba(0,206,201,0.1); color: var(--secondary); }
+.status-cancelled { background: rgba(214,48,49,0.1); color: var(--danger); }
+.status-awaiting_payment { background: rgba(253,121,168,0.1); color: var(--accent); }

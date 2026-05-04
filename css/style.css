@@ -986,6 +986,79 @@ footer {
     font-size: 0.9rem;
     font-weight: 500;
 }
+.payment-info-section {
+    margin-bottom: 15px;
+    padding: 15px;
+    background: var(--light);
+    border-radius: var(--radius-sm);
+}
+.payment-info-section h4 {
+    margin: 0 0 10px;
+    font-size: 0.95rem;
+}
+.bank-info-note {
+    font-size: 0.85rem;
+    color: var(--gray-2);
+    margin-bottom: 15px;
+}
+.bank-info-card {
+    background: var(--white);
+    border: 1px solid var(--gray-4);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    margin-bottom: 10px;
+}
+.bank-info-card.info {
+    border-color: var(--primary);
+    background: rgba(108, 92, 231, 0.05);
+}
+.bank-info-card.warning {
+    border-color: var(--warning);
+    background: rgba(253, 203, 110, 0.05);
+}
+.bank-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    color: var(--dark);
+}
+.bank-detail {
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.bank-detail span:first-child {
+    color: var(--gray-2);
+    font-weight: 500;
+}
+.bank-iban {
+    font-family: monospace;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+.btn-copy {
+    padding: 4px 10px;
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.btn-copy:hover {
+    background: var(--primary-dark);
+}
+.receipt-preview {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: var(--radius-sm);
+    margin-top: 10px;
+    border: 1px solid var(--gray-4);
+}
 .checkout-actions {
     display: flex;
     gap: 10px;
