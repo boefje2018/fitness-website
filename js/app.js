@@ -28,7 +28,14 @@ function loadProductsFromAdmin() {
     const allAdminProducts = [...xmlProducts, ...manualProducts];
 
     if (allAdminProducts.length > 0) {
-        allProducts = allAdminProducts;
+        allProducts = allAdminProducts.map(p => ({
+            ...p,
+            colors: p.colors || [],
+            sizes: p.sizes || [],
+            galleryImages: p.galleryImages || [],
+            videoUrl: p.videoUrl || '',
+            variants: p.variants || []
+        }));
         setupCategories();
         setupBrandFilters();
         filteredProducts = [...allProducts];
