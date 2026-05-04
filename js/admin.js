@@ -1800,7 +1800,7 @@ function renderOrders() {
             <td>${new Date(o.date).toLocaleDateString('tr-TR')}<br><small style="color:var(--gray-2)">${new Date(o.date).toLocaleTimeString('tr-TR', {hour:'2-digit',minute:'2-digit'})}</small></td>
             <td><span class="payment-badge payment-${o.paymentMethod}">${getPaymentLabel(o.paymentMethod)}</span></td>
             <td><strong>₺${(o.total || 0).toFixed(2)}</strong></td>
-            <td><select class="order-status-select" onclick="event.stopPropagation()" onchange="updateOrderStatus('${o.id}',this.value)"><option value="pending" ${o.status==='pending'?'selected':''}>Beklemede</option><option value="paid" ${o.status==='paid'?'selected':''}>Ödendi</option><option value="shipped" ${o.status==='shipped'?'selected':''}>Kargoda</option><option value="delivered" ${o.status==='delivered'?'selected':''}>Teslim Edildi</option><option value="cancelled" ${o.status==='cancelled'?'selected':''}>İptal</option></select></td>
+            <td><select class="order-status-select" onclick="event.stopPropagation()" onchange="updateOrderStatus('${o.id}',this.value)"><option value="pending" ${o.status==='pending'?'selected':''}>Beklemede</option><option value="awaiting_payment" ${o.status==='awaiting_payment'?'selected':''}>Ödeme Bekliyor</option><option value="paid" ${o.status==='paid'?'selected':''}>Ödendi</option><option value="shipped" ${o.status==='shipped'?'selected':''}>Kargoda</option><option value="delivered" ${o.status==='delivered'?'selected':''}>Teslim Edildi</option><option value="cancelled" ${o.status==='cancelled'?'selected':''}>İptal</option></select></td>
             <td><div class="action-btns"><button class="btn-delete" onclick="event.stopPropagation();deleteOrder('${o.id}')">Sil</button></div></td>
         </tr>
     `).join('') || '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--gray-2)">Sipariş bulunamadı.</td></tr>';
@@ -1882,7 +1882,7 @@ function sendOrderToWebhook(orderId) {
 }
 
 function getStatusLabel(status) {
-    return { pending: 'Beklemede', paid: 'Ödendi', shipped: 'Kargoda', delivered: 'Teslim Edildi', cancelled: 'İptal' }[status] || status;
+    return { pending: 'Beklemede', awaiting_payment: 'Ödeme Bekliyor', paid: 'Ödendi', shipped: 'Kargoda', delivered: 'Teslim Edildi', cancelled: 'İptal' }[status] || status;
 }
 
 function getPaymentLabel(method) {
