@@ -13,8 +13,9 @@
     <div id="loginPage" class="login-page">
         <div class="login-box">
             <h1>GYM<span>TAYT</span></h1>
-            <h2>Admin Panel</h2>
+            <h2>Yönetim Paneli</h2>
             <form onsubmit="handleLogin(event)">
+                <input type="text" id="loginUsername" placeholder="Kullanıcı adı" required>
                 <input type="password" id="loginPassword" placeholder="Şifre" required>
                 <button type="submit">Giriş Yap</button>
             </form>
@@ -24,402 +25,242 @@
 
     <div id="adminPanel" class="admin-panel" style="display:none">
         <aside class="admin-sidebar">
-            <div class="admin-logo">
-                <h1>GYM<span>TAYT</span></h1>
-                <span>Admin Panel</span>
-            </div>
+            <div class="admin-logo"><h1>GYM<span>TAYT</span></h1><span>Yönetim Paneli</span></div>
+            <div style="padding:10px 15px"><select onchange="changeLanguage(this.value)" style="width:100%;padding:8px"><option value="tr">Türkçe</option><option value="en">English</option></select></div>
             <nav class="admin-nav">
-                <a href="#" class="nav-item active" data-page="dashboard" onclick="showPage('dashboard', this); return false;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                    Dashboard
-                </a>
-                <a href="#" class="nav-item" data-page="feeds" onclick="showPage('feeds', this); return false;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
-                    XML Feed'ler
-                </a>
-                <a href="#" class="nav-item" data-page="products" onclick="showPage('products', this); return false;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-                    Ürünler
-                </a>
-                <a href="#" class="nav-item" data-page="add-product" onclick="showPage('add-product', this); return false;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-                    Ürün Ekle
-                </a>
-                <a href="#" class="nav-item" data-page="settings" onclick="showPage('settings', this); return false;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-                    Ayarlar
-                </a>
-                <a href="index.html" class="nav-item" target="_blank">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                    Siteye Git
-                </a>
+                <a href="#" class="nav-item active" data-page="dashboard" onclick="showPage('dashboard',this);return false;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Dashboard</a>
+                <a href="#" class="nav-item" data-page="products" onclick="showPage('products',this);return false;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg> Ürünler</a>
+                <a href="#" class="nav-item" data-page="add-product" onclick="showPage('add-product',this);return false;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> Ürün Ekle</a>
+                <a href="#" class="nav-item" data-page="categories" onclick="showPage('categories',this);return false;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg> Kategoriler</a>
+                <a href="#" class="nav-item" data-page="campaigns" onclick="showPage('campaigns',this);return false;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg> Kampanyalar</a>
+                <a href="#" class="nav-item" data-page="promotions" onclick="showPage('promotions',this);return false;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Promosyon Kodları</a>
+                <a href="#" class="nav-item" data-page="banners" onclick="showPage('banners',this);return false;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> Banner'lar</a>
+                <a href="#" class="nav-item" data-page="blog" onclick="showPage('blog',this);return false;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Blog</a>
+                <a href="#" class="nav-item" data-page="content-pages" onclick="showPage('content-pages',this);return false;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> İçerik Sayfaları</a>
+                <a href="#" class="nav-item" data-page="feeds" onclick="showPage('feeds',this);return false;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11a9 9 0 019 9"/><path d="M4 4a16 16 0 0116 16"/><circle cx="5" cy="19" r="1"/></svg> XML Feed'ler</a>
+                <a href="#" class="nav-item" data-page="members" onclick="showPage('members',this);return false;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> Üyeler</a>
+                <a href="#" class="nav-item" data-page="admins" onclick="showPage('admins',this);return false;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Yöneticiler</a>
+                <a href="#" class="nav-item" data-page="shipping" onclick="showPage('shipping',this);return false;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg> Kargo</a>
+                <a href="#" class="nav-item" data-page="seo" onclick="showPage('seo',this);return false;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> SEO</a>
+                <a href="#" class="nav-item" data-page="contact" onclick="showPage('contact',this);return false;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg> İletişim</a>
+                <a href="#" class="nav-item" data-page="statistics" onclick="showPage('statistics',this);return false;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> İstatistikler</a>
+                <a href="#" class="nav-item" data-page="settings" onclick="showPage('settings',this);return false;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg> Ayarlar</a>
+                <a href="index.html" class="nav-item" target="_blank"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg> Siteye Git</a>
             </nav>
-            <button class="logout-btn" onclick="handleLogout()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                Çıkış Yap
-            </button>
+            <button class="logout-btn" onclick="handleLogout()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Çıkış Yap</button>
         </aside>
 
         <main class="admin-main">
             <!-- DASHBOARD -->
             <div id="page-dashboard" class="admin-page active">
-                <div class="page-header">
-                    <h2>Dashboard</h2>
-                    <button class="btn-refresh" onclick="refreshAllFeeds()">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-                        Tüm Feed'leri Yenile
-                    </button>
-                </div>
+                <div class="page-header"><h2>Dashboard</h2><button class="btn-refresh" onclick="refreshAllFeeds()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg> Tüm Feed'leri Yenile</button></div>
                 <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background:rgba(108,92,231,0.1)">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
-                        </div>
-                        <div class="stat-info">
-                            <span id="statTotalProducts">0</span>
-                            <p>Toplam Ürün</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background:rgba(0,206,201,0.1)">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00cec9" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                        </div>
-                        <div class="stat-info">
-                            <span id="statInStock">0</span>
-                            <p>Stokta</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background:rgba(0,184,148,0.1)">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00b894" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                        </div>
-                        <div class="stat-info">
-                            <span id="statTotalStock">0</span>
-                            <p>Toplam Stok</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background:rgba(253,121,168,0.1)">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fd79a8" stroke-width="2"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
-                        </div>
-                        <div class="stat-info">
-                            <span id="statFeedCount">0</span>
-                            <p>XML Feed</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon" style="background:rgba(253,203,110,0.1)">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fdcb6e" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-                        </div>
-                        <div class="stat-info">
-                            <span id="statBrands">0</span>
-                            <p>Marka</p>
-                        </div>
-                    </div>
+                    <div class="stat-card"><div class="stat-icon" style="background:rgba(108,92,231,0.1)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div><div class="stat-info"><span id="statTotalProducts">0</span><p>Toplam Ürün</p></div></div>
+                    <div class="stat-card"><div class="stat-icon" style="background:rgba(0,206,201,0.1)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00cec9" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div class="stat-info"><span id="statInStock">0</span><p>Stokta</p></div></div>
+                    <div class="stat-card"><div class="stat-icon" style="background:rgba(0,184,148,0.1)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00b894" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div><div class="stat-info"><span id="statTotalStock">0</span><p>Toplam Stok</p></div></div>
+                    <div class="stat-card"><div class="stat-icon" style="background:rgba(253,121,168,0.1)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fd79a8" stroke-width="2"><path d="M4 11a9 9 0 019 9"/><path d="M4 4a16 16 0 0116 16"/><circle cx="5" cy="19" r="1"/></svg></div><div class="stat-info"><span id="statFeedCount">0</span><p>XML Feed</p></div></div>
+                    <div class="stat-card"><div class="stat-icon" style="background:rgba(253,203,110,0.1)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fdcb6e" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div><div class="stat-info"><span id="statBrands">0</span><p>Marka</p></div></div>
+                    <div class="stat-card"><div class="stat-icon" style="background:rgba(0,184,148,0.1)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00b894" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div><div class="stat-info"><span id="statOrders">0</span><p>Sepet Ürün</p></div></div>
+                    <div class="stat-card"><div class="stat-icon" style="background:rgba(108,92,231,0.1)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div><div class="stat-info"><span id="statMembers">0</span><p>Üye</p></div></div>
+                    <div class="stat-card"><div class="stat-icon" style="background:rgba(214,48,49,0.1)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d63031" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div><div class="stat-info"><span id="statBlogPosts">0</span><p>Blog Yazısı</p></div></div>
                 </div>
-                <div class="recent-feeds">
-                    <h3>Feed Durumu</h3>
-                    <div id="feedStatusList"></div>
-                </div>
+                <div class="recent-feeds"><h3>Feed Durumu</h3><div id="feedStatusList"></div></div>
             </div>
 
-            <!-- XML FEEDLER -->
-            <div id="page-feeds" class="admin-page">
-                <div class="page-header">
-                    <h2>XML Feed Yönetimi</h2>
-                </div>
-                <div class="add-feed-form">
-                    <h3>Yeni Feed Ekle</h3>
-                    <div class="form-row">
-                        <input type="url" id="feedUrlInput" placeholder="https://example.com/feed.xml" required>
-                        <input type="text" id="feedNameInput" placeholder="Feed adı (opsiyonel)">
-                        <button class="btn-primary" onclick="addFeed()">Ekle</button>
-                    </div>
-                </div>
-                <div class="feeds-list">
-                    <h3>Mevcut Feed'ler</h3>
-                    <div id="feedsContainer"></div>
-                </div>
-            </div>
-
-            <!-- URUNLER -->
+            <!-- PRODUCTS -->
             <div id="page-products" class="admin-page">
-                <div class="page-header">
-                    <h2>Ürün Yönetimi</h2>
-                    <div class="search-input">
-                        <input type="text" id="adminSearch" placeholder="Ürün ara..." oninput="renderAdminProducts()">
-                        <select id="adminFilterBrand" onchange="renderAdminProducts()">
-                            <option value="">Tüm Markalar</option>
-                        </select>
-                        <select id="adminFilterStatus" onchange="renderAdminProducts()">
-                            <option value="">Tümü</option>
-                            <option value="instock">Stokta</option>
-                            <option value="outofstock">Tükendi</option>
-                            <option value="manual">Manuel Eklenen</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="products-table-wrap">
-                    <table class="products-table">
-                        <thead>
-                            <tr>
-                                <th>Görsel</th>
-                                <th>Ürün Adı</th>
-                                <th>Marka</th>
-                                <th>Fiyat</th>
-                                <th>Stok</th>
-                                <th>Varyantlar</th>
-                                <th>Kaynak</th>
-                                <th>İşlem</th>
-                            </tr>
-                        </thead>
-                        <tbody id="productsTableBody"></tbody>
-                    </table>
-                </div>
+                <div class="page-header"><h2>Ürün Yönetimi</h2><div class="search-input"><input type="text" id="adminSearch" placeholder="Ürün ara..." oninput="renderAdminProducts()"><select id="adminFilterBrand" onchange="renderAdminProducts()"><option value="">Tüm Markalar</option></select><select id="adminFilterStatus" onchange="renderAdminProducts()"><option value="">Tümü</option><option value="instock">Stokta</option><option value="outofstock">Tükendi</option><option value="manual">Manuel Eklenen</option></select></div></div>
+                <div class="products-table-wrap"><table class="products-table"><thead><tr><th>Görsel</th><th>Ürün Adı</th><th>Marka</th><th>Fiyat</th><th>Stok</th><th>Varyantlar</th><th>Kaynak</th><th>İşlem</th></tr></thead><tbody id="productsTableBody"></tbody></table></div>
                 <div id="productsPagination" class="pagination"></div>
             </div>
 
-            <!-- URUN EKLE -->
+            <!-- ADD PRODUCT -->
             <div id="page-add-product" class="admin-page">
-                <div class="page-header">
-                    <h2>Manuel Ürün Ekle</h2>
-                </div>
+                <div class="page-header"><h2>Ürün Ekle</h2></div>
                 <form class="product-form" onsubmit="handleAddProduct(event)">
                     <div class="form-grid">
-                        <div class="form-group">
-                            <label>Ürün Adı *</label>
-                            <input type="text" id="newProductName" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Marka *</label>
-                            <input type="text" id="newProductBrand" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Kategori</label>
-                            <input type="text" id="newProductCategory" placeholder="örn: Tayt">
-                        </div>
-                        <div class="form-group">
-                            <label>Fiyat (₺) *</label>
-                            <input type="number" step="0.01" id="newProductPrice" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Normal Fiyat (₺)</label>
-                            <input type="number" step="0.01" id="newProductRegularPrice">
-                        </div>
-                        <div class="form-group">
-                            <label>Stok Adedi</label>
-                            <input type="number" id="newProductStock" value="0">
-                        </div>
-                        <div class="form-group">
-                            <label>Renkler (virgülle ayırın)</label>
-                            <input type="text" id="newProductColors" placeholder="siyah, beyaz, kırmızı">
-                        </div>
-                        <div class="form-group">
-                            <label>Bedenler (virgülle ayırın)</label>
-                            <input type="text" id="newProductSizes" placeholder="XS, S, M, L, XL">
-                        </div>
-                        <div class="form-group full-width">
-                            <label>Ana Görsel</label>
-                            <div class="upload-area">
-                                <input type="text" id="newProductImage" placeholder="Görsel URL yapıştırın veya dosya seçin">
-                                <label class="btn-upload">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                                    Dosya Yükle
-                                    <input type="file" accept="image/*" onchange="handleImageUpload(this, 'newProductImage')" hidden>
-                                </label>
-                                <img id="newProductImage-preview" class="image-preview" style="display:none">
-                            </div>
-                        </div>
-                        <div class="form-group full-width">
-                            <label>Video URL (YouTube/Vimeo embed)</label>
-                            <input type="url" id="newProductVideo" placeholder="https://www.youtube.com/embed/VIDEO_ID">
-                        </div>
-                        <div class="form-group full-width">
-                            <label>Ek Görseller</label>
-                            <div class="upload-area">
-                                <textarea id="newProductGallery" rows="3" placeholder="Görsel URL'leri (her satıra bir tane)"></textarea>
-                                <label class="btn-upload">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                                    Çoklu Dosya Yükle
-                                    <input type="file" accept="image/*" multiple onchange="handleGalleryUpload(this)" hidden>
-                                </label>
-                            </div>
-                            <div id="gallery-previews" class="gallery-previews"></div>
-                        </div>
-                        <div class="form-group full-width">
-                            <label>Açıklama (HTML Editör)</label>
-                            <div id="newProductDescription-editor" style="height:300px"></div>
-                            <textarea id="newProductDescription" rows="10" style="display:none"></textarea>
-                        </div>
+                        <div class="form-group"><label>Ürün Adı *</label><input type="text" id="newProductName" required></div>
+                        <div class="form-group"><label>Marka *</label><input type="text" id="newProductBrand" required></div>
+                        <div class="form-group"><label>Kategori</label><input type="text" id="newProductCategory"></div>
+                        <div class="form-group"><label>Fiyat (₺) *</label><input type="number" step="0.01" id="newProductPrice" required></div>
+                        <div class="form-group"><label>Normal Fiyat (₺)</label><input type="number" step="0.01" id="newProductRegularPrice"></div>
+                        <div class="form-group"><label>KDV Oranı (%)</label><input type="number" id="newProductTax" value="18"></div>
+                        <div class="form-group"><label>Stok Adedi</label><input type="number" id="newProductStock" value="0"></div>
+                        <div class="form-group"><label>Renkler (virgülle)</label><input type="text" id="newProductColors" placeholder="siyah, beyaz"></div>
+                        <div class="form-group"><label>Bedenler (virgülle)</label><input type="text" id="newProductSizes" placeholder="XS, S, M, L, XL"></div>
+                        <div class="form-group full-width"><label>Ana Görsel</label><div class="upload-area"><input type="text" id="newProductImage" placeholder="URL veya dosya yükle"><label class="btn-upload"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Dosya Yükle<input type="file" accept="image/*" onchange="handleImageUpload(this,'newProductImage')" hidden></label><img id="newProductImage-preview" class="image-preview" style="display:none"></div></div>
+                        <div class="form-group full-width"><label>Video URL (YouTube embed)</label><input type="url" id="newProductVideo" placeholder="https://www.youtube.com/embed/..."></div>
+                        <div class="form-group full-width"><label>Ek Görseller</label><div class="upload-area"><textarea id="newProductGallery" rows="3" placeholder="URL'ler (her satıra bir tane)"></textarea><label class="btn-upload"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> Çoklu Yükle<input type="file" accept="image/*" multiple onchange="handleGalleryUpload(this)" hidden></label></div><div id="gallery-previews" class="gallery-previews"></div></div>
+                        <div class="form-group"><label>Kampanya Fiyatı (₺)</label><input type="number" step="0.01" id="newProductCampaignPrice" placeholder="Boş bırakılırsa kampanya yok"></div>
+                        <div class="form-group"><label>Öne Çıkar</label><label class="checkbox-label"><input type="checkbox" id="newProductFeatured"> <span class="checkmark"></span>Ana sayfada göster</label></div>
+                        <div class="form-group full-width"><label>Açıklama</label><div id="newProductDescription-editor" style="height:300px"></div><textarea id="newProductDescription" rows="10" style="display:none"></textarea></div>
                     </div>
                     <button type="submit" class="btn-primary btn-lg">Ürünü Kaydet</button>
                 </form>
             </div>
 
-            <!-- AYARLAR -->
-            <div id="page-settings" class="admin-page">
-                <div class="page-header">
-                    <h2>Ayarlar</h2>
-                </div>
-                <div class="settings-section">
-                    <h3>Şifre Değiştir</h3>
-                    <form onsubmit="handleChangePassword(event)" class="settings-form">
-                        <div class="form-group">
-                            <label>Mevcut Şifre</label>
-                            <input type="password" id="currentPassword" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Yeni Şifre</label>
-                            <input type="password" id="newPassword" required minlength="4">
-                        </div>
-                        <div class="form-group">
-                            <label>Yeni Şifre (Tekrar)</label>
-                            <input type="password" id="confirmNewPassword" required minlength="4">
-                        </div>
-                        <button type="submit" class="btn-primary">Şifreyi Değiştir</button>
-                    </form>
-                </div>
-                <div class="settings-section">
-                    <h3>Veri Yedekleme</h3>
-                    <p style="color:var(--gray-2);margin-bottom:15px">Tüm ürünleri, feed'leri ve ayarları JSON dosyası olarak dışa/içe aktarın.</p>
-                    <div class="backup-actions">
-                        <button class="btn-primary" onclick="exportData()">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                            Verileri Dışa Aktar (JSON)
-                        </button>
-                        <label class="btn-secondary">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                            Verileri İçe Aktar
-                            <input type="file" accept=".json" onchange="importData(event)" hidden>
-                        </label>
+            <!-- CATEGORIES -->
+            <div id="page-categories" class="admin-page">
+                <div class="page-header"><h2>Kategori Yönetimi</h2></div>
+                <div class="add-feed-form"><h3>Yeni Kategori</h3><div class="form-row"><input type="text" id="newCategoryName" placeholder="Kategori adı"><input type="text" id="newCategorySlug" placeholder="Slug (opsiyonel)"><input type="text" id="newCategoryImage" placeholder="Görsel URL"><button class="btn-primary" onclick="addCategory()">Ekle</button></div></div>
+                <div class="feeds-list"><h3>Kategoriler</h3><div id="categoriesList"></div></div>
+            </div>
+
+            <!-- CAMPAIGNS -->
+            <div id="page-campaigns" class="admin-page">
+                <div class="page-header"><h2>Kampanya Yönetimi</h2></div>
+                <div class="add-feed-form"><h3>Yeni Kampanya</h3><div class="form-row"><select id="campaignProductSelect"></select><input type="number" step="0.01" id="campaignDiscountPrice" placeholder="Kampanya fiyatı"><input type="date" id="campaignStartDate"><input type="date" id="campaignEndDate"><button class="btn-primary" onclick="addCampaign()">Ekle</button></div></div>
+                <div class="feeds-list"><h3>Aktif Kampanyalar</h3><div id="campaignsList"></div></div>
+            </div>
+
+            <!-- PROMOTIONS -->
+            <div id="page-promotions" class="admin-page">
+                <div class="page-header"><h2>Promosyon Kodları</h2></div>
+                <div class="add-feed-form"><h3>Yeni Promosyon Kodu</h3><div class="form-row"><input type="text" id="promoCode" placeholder="Kod (örn: INDIRIM10)"><select id="promoType"><option value="percent">Yüzde (%)</option><option value="fixed">Sabit (₺)</option></select><input type="number" step="0.01" id="promoValue" placeholder="Değer"><input type="number" step="0.01" id="promoMinOrder" placeholder="Min sipariş"><button class="btn-primary" onclick="addPromotion()">Ekle</button></div></div>
+                <div class="feeds-list"><h3>Promosyon Kodları</h3><div id="promotionsList"></div></div>
+            </div>
+
+            <!-- BANNERS -->
+            <div id="page-banners" class="admin-page">
+                <div class="page-header"><h2>Banner Yönetimi</h2></div>
+                <div class="add-feed-form"><h3>Yeni Banner</h3><div class="form-row"><input type="text" id="bannerTitle" placeholder="Banner başlığı"><input type="text" id="bannerImage" placeholder="Görsel URL"><label class="btn-upload">Dosya Yükle<input type="file" accept="image/*" onchange="handleImageUpload(this,'bannerImage')" hidden></label><input type="text" id="bannerLink" placeholder="Tıklama linki"><img id="bannerImage-preview" class="image-preview" style="display:none"><button class="btn-primary" onclick="addBanner()">Ekle</button></div></div>
+                <div class="feeds-list"><h3>Banner'lar</h3><div id="bannersList"></div></div>
+            </div>
+
+            <!-- BLOG -->
+            <div id="page-blog" class="admin-page">
+                <div class="page-header"><h2>Blog Yönetimi</h2></div>
+                <form class="product-form" onsubmit="handleAddBlogPost(event)">
+                    <div class="form-grid">
+                        <div class="form-group full-width"><label>Başlık</label><input type="text" id="newBlogTitle" required></div>
+                        <div class="form-group full-width"><label>Görsel URL</label><input type="text" id="newBlogImage" placeholder="https://..."></div>
+                        <div class="form-group full-width"><label>İçerik</label><div id="newBlogContent-editor" style="height:300px"></div><textarea id="newBlogContent" rows="10" style="display:none"></textarea></div>
                     </div>
+                    <button type="submit" class="btn-primary btn-lg">Blog Yazısını Yayınla</button>
+                </form>
+                <div class="feeds-list" style="margin-top:20px"><h3>Blog Yazıları</h3><div id="blogPostsList"></div></div>
+            </div>
+
+            <!-- CONTENT PAGES -->
+            <div id="page-content-pages" class="admin-page">
+                <div class="page-header"><h2>İçerik Sayfaları</h2></div>
+                <form class="product-form" onsubmit="handleAddContentPage(event)">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Sayfa Başlığı</label><input type="text" id="newPageTitle" required></div>
+                        <div class="form-group"><label>URL Slug</label><input type="text" id="newPageSlug" placeholder="hakkimizda, iletisim, iade-politikasi"></div>
+                        <div class="form-group full-width"><label>İçerik</label><div id="newPageContent-editor" style="height:300px"></div><textarea id="newPageContent" rows="10" style="display:none"></textarea></div>
+                    </div>
+                    <button type="submit" class="btn-primary btn-lg">Sayfayı Kaydet</button>
+                </form>
+                <div class="feeds-list" style="margin-top:20px"><h3>İçerik Sayfaları</h3><div id="contentPagesList"></div></div>
+            </div>
+
+            <!-- XML FEEDS -->
+            <div id="page-feeds" class="admin-page">
+                <div class="page-header"><h2>XML Feed Yönetimi</h2></div>
+                <div class="add-feed-form"><h3>Yeni Feed</h3><div class="form-row"><input type="url" id="feedUrlInput" placeholder="https://..."><input type="text" id="feedNameInput" placeholder="Ad"><button class="btn-primary" onclick="addFeed()">Ekle</button></div></div>
+                <div class="feeds-list"><h3>Mevcut Feed'ler</h3><div id="feedsContainer"></div></div>
+            </div>
+
+            <!-- MEMBERS -->
+            <div id="page-members" class="admin-page">
+                <div class="page-header"><h2>Üye Yönetimi</h2></div>
+                <div class="feeds-list"><h3>Üyeler</h3><div id="membersList"></div></div>
+            </div>
+
+            <!-- ADMINS -->
+            <div id="page-admins" class="admin-page">
+                <div class="page-header"><h2>Yönetici Yönetimi</h2></div>
+                <div class="add-feed-form"><h3>Yeni Yönetici</h3><div class="form-row"><input type="text" id="newAdminUsername" placeholder="Kullanıcı adı"><input type="password" id="newAdminPassword" placeholder="Şifre"><select id="newAdminRole"><option value="editor">Editör</option><option value="admin">Admin</option></select><button class="btn-primary" onclick="addAdmin()">Ekle</button></div></div>
+                <div class="feeds-list"><h3>Yöneticiler</h3><div id="adminsList"></div></div>
+            </div>
+
+            <!-- SHIPPING -->
+            <div id="page-shipping" class="admin-page">
+                <div class="page-header"><h2>Kargo Ayarları</h2></div>
+                <div class="settings-section">
+                    <h3>Kargo Modu</h3>
+                    <select id="shippingMode" style="margin-bottom:15px"><option value="fixed">Sabit Fiyat</option><option value="free">Ücretsiz Kargo</option><option value="weight">Ağırlığa Göre</option></select>
+                    <div class="form-group" style="margin-bottom:10px"><label>Sabit Kargo Fiyatı (₺)</label><input type="number" step="0.01" id="fixedPrice" value="50"></div>
+                    <div class="form-group" style="margin-bottom:15px"><label>Ücretsiz Kargo Minimum Sipariş (₺)</label><input type="number" step="0.01" id="freeThreshold" value="500"></div>
+                    <button class="btn-primary" onclick="saveShipping()">Kaydet</button>
                 </div>
-                <div class="settings-section danger-zone">
-                    <h3>Tehlikeli Bölge</h3>
-                    <p style="color:var(--gray-2);margin-bottom:15px">Bu işlemler geri alınamaz!</p>
-                    <button class="btn-danger" onclick="clearAllManualProducts()">Manuel Ürünleri Temizle</button>
-                    <button class="btn-danger" onclick="resetAllData()">Tüm Verileri Sıfırla</button>
+            </div>
+
+            <!-- SEO -->
+            <div id="page-seo" class="admin-page">
+                <div class="page-header"><h2>SEO Ayarları</h2></div>
+                <div class="settings-section">
+                    <div class="form-group" style="margin-bottom:10px"><label>Site Başlığı</label><input type="text" id="seoTitle" placeholder="GymTayt - Spor Giyim Mağazası"></div>
+                    <div class="form-group" style="margin-bottom:10px"><label>Meta Açıklama</label><textarea id="seoDescription" rows="3" placeholder="Site açıklaması"></textarea></div>
+                    <div class="form-group" style="margin-bottom:10px"><label>Anahtar Kelimeler</label><input type="text" id="seoKeywords" placeholder="spor giyim, tayt, atlet, fitness"></div>
+                    <div class="form-group" style="margin-bottom:15px"><label>OG Görsel URL</label><input type="text" id="seoOgImage" placeholder="https://..."></div>
+                    <button class="btn-primary" onclick="saveSEOSettings()">Kaydet</button>
                 </div>
+            </div>
+
+            <!-- CONTACT -->
+            <div id="page-contact" class="admin-page">
+                <div class="page-header"><h2>İletişim Ayarları</h2></div>
+                <div class="settings-section">
+                    <div class="form-group" style="margin-bottom:10px"><label>Telefon</label><input type="text" id="contactPhone"></div>
+                    <div class="form-group" style="margin-bottom:10px"><label>E-posta</label><input type="email" id="contactEmail"></div>
+                    <div class="form-group" style="margin-bottom:10px"><label>Adres</label><textarea id="contactAddress" rows="3"></textarea></div>
+                    <div class="form-group" style="margin-bottom:10px"><label>WhatsApp</label><input type="text" id="contactWhatsapp" placeholder="905xxxxxxxxx"></div>
+                    <div class="form-group" style="margin-bottom:10px"><label>Instagram</label><input type="text" id="contactInstagram" placeholder="username"></div>
+                    <div class="form-group" style="margin-bottom:10px"><label>Facebook</label><input type="text" id="contactFacebook" placeholder="page URL"></div>
+                    <div class="form-group" style="margin-bottom:15px"><label>Twitter</label><input type="text" id="contactTwitter" placeholder="@username"></div>
+                    <button class="btn-primary" onclick="saveContact()">Kaydet</button>
+                </div>
+            </div>
+
+            <!-- STATISTICS -->
+            <div id="page-statistics" class="admin-page">
+                <div class="page-header"><h2>İstatistikler</h2></div>
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-icon" style="background:rgba(108,92,231,0.1)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6c5ce7" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div><div class="stat-info"><span id="statVisits">0</span><p>Ziyaret</p></div></div>
+                    <div class="stat-card"><div class="stat-icon" style="background:rgba(0,206,201,0.1)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00cec9" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div><div class="stat-info"><span id="statCartItems">0</span><p>Sepet Ürün</p></div></div>
+                    <div class="stat-card"><div class="stat-icon" style="background:rgba(0,184,148,0.1)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00b894" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="stat-info"><span id="statRevenue">₺0</span><p>Sepet Toplamı</p></div></div>
+                    <div class="stat-card"><div class="stat-icon" style="background:rgba(253,121,168,0.1)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fd79a8" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div><div class="stat-info"><span id="statProducts">0</span><p>Ürün</p></div></div>
+                    <div class="stat-card"><div class="stat-icon" style="background:rgba(253,203,110,0.1)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fdcb6e" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div><div class="stat-info"><span id="statMembersStats">0</span><p>Üye</p></div></div>
+                </div>
+            </div>
+
+            <!-- SETTINGS -->
+            <div id="page-settings" class="admin-page">
+                <div class="page-header"><h2>Ayarlar</h2></div>
+                <div class="settings-section"><h3>Şifre Değiştir</h3><form onsubmit="handleChangePassword(event)" class="settings-form"><div class="form-group"><label>Mevcut Şifre</label><input type="password" id="currentPassword" required></div><div class="form-group"><label>Yeni Şifre</label><input type="password" id="newPassword" required minlength="4"></div><div class="form-group"><label>Yeni Şifre (Tekrar)</label><input type="password" id="confirmNewPassword" required minlength="4"></div><button type="submit" class="btn-primary">Şifreyi Değiştir</button></form></div>
+                <div class="settings-section"><h3>Veri Dışa Aktarma</h3><div class="backup-actions"><button class="btn-primary" onclick="exportData()">JSON Yedek Al</button><label class="btn-secondary">JSON Yedek Yükle<input type="file" accept=".json" onchange="importData(event)" hidden></label><button class="btn-primary" onclick="exportToExcel('products')">Ürünler Excel</button><button class="btn-primary" onclick="exportToExcel('members')">Üyeler Excel</button><button class="btn-primary" onclick="exportToXML()">Ürünler XML</button></div></div>
+                <div class="settings-section danger-zone"><h3>Tehlikeli Bölge</h3><button class="btn-danger" onclick="clearAllManualProducts()">Manuel Ürünleri Temizle</button><button class="btn-danger" onclick="resetAllData()">Tüm Verileri Sıfırla</button></div>
             </div>
         </main>
     </div>
 
     <!-- EDIT MODAL -->
-    <div id="editModal" class="modal">
-        <div class="modal-content edit-modal">
-            <button class="close-modal" onclick="closeEditModal()">&times;</button>
-            <h2>Ürünü Düzenle</h2>
-            <form class="product-form" onsubmit="handleEditProduct(event)">
-                <input type="hidden" id="editProductId">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Ürün Adı</label>
-                        <input type="text" id="editName" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Marka</label>
-                        <input type="text" id="editBrand" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Kategori</label>
-                        <input type="text" id="editCategory">
-                    </div>
-                    <div class="form-group">
-                        <label>Fiyat (₺)</label>
-                        <input type="number" step="0.01" id="editPrice" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Normal Fiyat (₺)</label>
-                        <input type="number" step="0.01" id="editRegularPrice">
-                    </div>
-                    <div class="form-group">
-                        <label>Stok Adedi</label>
-                        <input type="number" id="editStock">
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Ana Görsel</label>
-                        <div class="upload-area">
-                            <input type="text" id="editImage" placeholder="Görsel URL">
-                            <label class="btn-upload">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                                Dosya Yükle
-                                <input type="file" accept="image/*" onchange="handleImageUpload(this, 'editImage')" hidden>
-                            </label>
-                            <img id="editImage-preview" class="image-preview" style="display:none">
-                        </div>
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Video URL</label>
-                        <input type="url" id="editVideo" placeholder="https://www.youtube.com/embed/VIDEO_ID">
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Ek Görseller</label>
-                        <div class="upload-area">
-                            <textarea id="editGallery" rows="3" placeholder="Görsel URL'leri"></textarea>
-                            <label class="btn-upload">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                                Çoklu Dosya Yükle
-                                <input type="file" accept="image/*" multiple onchange="handleEditGalleryUpload(this)" hidden>
-                            </label>
-                        </div>
-                        <div id="edit-gallery-previews" class="gallery-previews"></div>
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Açıklama</label>
-                        <div id="editDescription-editor" style="height:250px"></div>
-                        <textarea id="editDescription" rows="10" style="display:none"></textarea>
-                    </div>
-                </div>
-                <button type="submit" class="btn-primary btn-lg">Kaydet</button>
-            </form>
-        </div>
-    </div>
+    <div id="editModal" class="modal"><div class="modal-content edit-modal"><button class="close-modal" onclick="closeEditModal()">&times;</button><h2>Ürünü Düzenle</h2><form class="product-form" onsubmit="handleEditProduct(event)"><input type="hidden" id="editProductId"><div class="form-grid"><div class="form-group"><label>Ürün Adı</label><input type="text" id="editName" required></div><div class="form-group"><label>Marka</label><input type="text" id="editBrand" required></div><div class="form-group"><label>Kategori</label><input type="text" id="editCategory"></div><div class="form-group"><label>Fiyat (₺)</label><input type="number" step="0.01" id="editPrice" required></div><div class="form-group"><label>Normal Fiyat (₺)</label><input type="number" step="0.01" id="editRegularPrice"></div><div class="form-group"><label>KDV (%)</label><input type="number" id="editTax" value="18"></div><div class="form-group"><label>Stok</label><input type="number" id="editStock"></div><div class="form-group"><label>Kampanya Fiyatı</label><input type="number" step="0.01" id="editCampaignPrice"></div><div class="form-group"><label><input type="checkbox" id="editFeatured"> Öne Çıkar</label></div><div class="form-group"><label><input type="checkbox" id="editCampaign"> Kampanyalı</label></div><div class="form-group full-width"><label>Ana Görsel</label><div class="upload-area"><input type="text" id="editImage"><label class="btn-upload">Dosya Yükle<input type="file" accept="image/*" onchange="handleImageUpload(this,'editImage')" hidden></label><img id="editImage-preview" class="image-preview" style="display:none"></div></div><div class="form-group full-width"><label>Video URL</label><input type="url" id="editVideo"></div><div class="form-group full-width"><label>Ek Görseller</label><div class="upload-area"><textarea id="editGallery" rows="3"></textarea><label class="btn-upload">Çoklu Yükle<input type="file" accept="image/*" multiple onchange="handleEditGalleryUpload(this)" hidden></label></div><div id="edit-gallery-previews" class="gallery-previews"></div></div><div class="form-group full-width"><label>Açıklama</label><div id="editDescription-editor" style="height:250px"></div><textarea id="editDescription" rows="10" style="display:none"></textarea></div></div><button type="submit" class="btn-primary btn-lg">Kaydet</button></form></div></div>
 
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.0/dist/quill.js"></script>
     <script src="js/admin.js"></script>
     <script>
-        // Quill editors init
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof Quill !== 'undefined') {
-                window.newQuill = new Quill('#newProductDescription-editor', {
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof Quill === 'undefined') return;
+        const editors = ['newProductDescription', 'editDescription', 'newBlogContent', 'newPageContent'];
+        editors.forEach(id => {
+            const el = document.getElementById(id + '-editor');
+            if (el && !el.querySelector('.ql-toolbar')) {
+                const textarea = document.getElementById(id);
+                if (textarea) textarea.style.display = 'none';
+                const q = new Quill('#' + id + '-editor', {
                     theme: 'snow',
-                    modules: {
-                        toolbar: [
-                            [{ 'header': [1, 2, 3, false] }],
-                            ['bold', 'italic', 'underline', 'strike'],
-                            [{ 'color': [] }, { 'background': [] }],
-                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                            ['blockquote', 'code-block'],
-                            ['link', 'image', 'video'],
-                            ['clean']
-                        ]
-                    },
-                    placeholder: 'Ürün açıklaması yazın...'
+                    modules: { toolbar: [['bold','italic','underline','strike'],[{header:[1,2,3,false]}],[{color:[]},{background:[]}],['list','bullet'],['blockquote','code-block','link','image','video'],['clean']] },
+                    placeholder: 'İçerik yazın...'
                 });
-                window.newQuill.on('text-change', function() {
-                    document.getElementById('newProductDescription').value = window.newQuill.root.innerHTML;
-                });
-
-                window.editQuill = new Quill('#editDescription-editor', {
-                    theme: 'snow',
-                    modules: {
-                        toolbar: [
-                            [{ 'header': [1, 2, 3, false] }],
-                            ['bold', 'italic', 'underline', 'strike'],
-                            [{ 'color': [] }, { 'background': [] }],
-                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                            ['blockquote', 'code-block'],
-                            ['link', 'image', 'video'],
-                            ['clean']
-                        ]
-                    },
-                    placeholder: 'Ürün açıklaması yazın...'
-                });
-                window.editQuill.on('text-change', function() {
-                    document.getElementById('editDescription').value = window.editQuill.root.innerHTML;
-                });
+                q.root.innerHTML = textarea?.value || '';
+                q.on('text-change', function() { if (textarea) textarea.value = q.root.innerHTML; });
+                window[id.replace('new','').toLowerCase().replace('Description','Desc').replace('Blog','Blog').replace('Page','Page') + 'Quill'] = q;
             }
         });
+    });
     </script>
 </body>
 </html>
