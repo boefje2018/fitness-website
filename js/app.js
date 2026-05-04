@@ -508,13 +508,233 @@ function checkout() {
         alert('Sepetiniz boş!');
         return;
     }
+    showCheckout();
+}
+
+function showCartItems() {
+    document.getElementById('checkoutSection').style.display = 'none';
+    document.getElementById('cartFooter').style.display = 'block';
+}
+
+function showCheckout() {
+    if (cart.length === 0) {
+        alert('Sepetiniz boş!');
+        return;
+    }
+    const paymentSettings = getPaymentSettings();
+    const container = document.getElementById('paymentMethods');
+    let html = '';
+
+    if (paymentSettings.whatsapp) {
+        html += `<label class="payment-method-option" onclick="selectPayment('whatsapp')"><input type="radio" name="paymentMethod" value="whatsapp" checked><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg><span>WhatsApp ile Sipariş</span></label>`;
+    }
+    if (paymentSettings.email) {
+        html += `<label class="payment-method-option" onclick="selectPayment('email')"><input type="radio" name="paymentMethod" value="email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg><span>E-posta ile Sipariş</span></label>`;
+    }
+    if (paymentSettings.door) {
+        html += `<label class="payment-method-option" onclick="selectPayment('door')"><input type="radio" name="paymentMethod" value="door"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Kapıda Ödeme</span></label>`;
+    }
+    if (paymentSettings.bank) {
+        html += `<label class="payment-method-option" onclick="selectPayment('bank')"><input type="radio" name="paymentMethod" value="bank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg><span>EFT/Havale</span></label>`;
+    }
+
+    container.innerHTML = html || '<p style="color:var(--gray-2);font-size:0.9rem">Ödeme yöntemi bulunmuyor.</p>';
+    document.getElementById('checkoutSection').style.display = 'block';
+    document.getElementById('cartFooter').style.display = 'none';
+}
+
+function selectPayment(method) {
+    document.querySelectorAll('.payment-method-option').forEach(el => el.classList.remove('selected'));
+    document.querySelector(`input[name="paymentMethod"][value="${method}"]`).closest('.payment-method-option').classList.add('selected');
+}
+
+function completeOrder() {
+    const name = document.getElementById('checkName').value.trim();
+    const phone = document.getElementById('checkPhone').value.trim();
+    const email = document.getElementById('checkEmail').value.trim();
+    const address = document.getElementById('checkAddress').value.trim();
+    const note = document.getElementById('checkNote').value.trim();
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+
+    if (!name || !phone || !address) {
+        alert('Lütfen ad, telefon ve adres alanlarını doldurun.');
+        return;
+    }
+    if (!paymentMethod) {
+        alert('Lütfen bir ödeme yöntemi seçin.');
+        return;
+    }
 
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const message = cart.map(item =>
-        `${item.name} - ${item.renk} / ${item.bed} x${item.quantity} = ₺${(item.price * item.quantity).toFixed(2)}`
-    ).join('\n') + `\n\nToplam: ₺${total.toFixed(2)}`;
+    const orderItems = cart.map(item => `${item.name} (${item.renk} / ${item.bed}) x${item.quantity} - ₺${(item.price * item.quantity).toFixed(2)}`).join('\n');
+    const orderSummary = `Sipariş Özeti:\n\nMüşteri: ${name}\nTelefon: ${phone}\nE-posta: ${email || '-'}\nAdres: ${address}\nÖdeme: ${getPaymentLabel(paymentMethod)}\n\n${orderItems}\n\nToplam: ₺${total.toFixed(2)}${note ? '\nNot: ' + note : ''}`;
 
-    alert('Sipariş Özeti:\n\n' + message + '\n\nBu bir demo sitesidir. Gerçek ödeme alınmamaktadır.');
+    const order = {
+        id: 'ORD-' + Date.now(),
+        date: new Date().toISOString(),
+        customer: { name, phone, email, address },
+        paymentMethod,
+        items: cart.map(i => ({ ...i })),
+        total,
+        note,
+        status: 'pending'
+    };
+
+    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    orders.push(order);
+    localStorage.setItem('orders', JSON.stringify(orders));
+
+    switch (paymentMethod) {
+        case 'whatsapp':
+            const contact = JSON.parse(localStorage.getItem('contactSettings') || '{}');
+            const waNumber = contact.whatsapp || '905000000000';
+            const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(orderSummary)}`;
+            window.open(waUrl, '_blank');
+            break;
+        case 'email':
+            const mailSubject = `Sipariş #${order.id}`;
+            window.location.href = `mailto:${contact.email || ''}?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(orderSummary)}`;
+            break;
+        case 'door':
+        case 'bank':
+            alert('Siparişiniz alındı!\n\n' + orderSummary);
+            break;
+    }
+
+    cart = [];
+    saveCart();
+    updateCartCount();
+    showCartItems();
+    toggleCart();
+    showToast('Siparişiniz gönderildi!');
+}
+
+function getPaymentLabel(method) {
+    return { whatsapp: 'WhatsApp', email: 'E-posta', door: 'Kapıda Ödeme', bank: 'EFT/Havale' }[method] || method;
+}
+
+function getPaymentSettings() {
+    return JSON.parse(localStorage.getItem('paymentSettings') || JSON.stringify({
+        whatsapp: true, email: true, door: true, bank: false
+    }));
+}
+
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.style.cssText = `position:fixed;top:20px;right:20px;padding:15px 25px;border-radius:8px;color:white;font-weight:500;z-index:10000;animation:slideIn 0.3s ease;background:${type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--danger)' : 'var(--primary)'}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+// ===================== AI CHAT =====================
+function toggleAiChat() {
+    const window = document.getElementById('aiChatWindow');
+    const isOpen = window.style.display !== 'none';
+    window.style.display = isOpen ? 'none' : 'flex';
+    if (!isOpen) {
+        document.getElementById('aiChatInput').focus();
+    }
+}
+
+function sendAiMessage() {
+    const input = document.getElementById('aiChatInput');
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    const messages = document.getElementById('aiChatMessages');
+    messages.innerHTML += `<div class="user-message">${escapeHtml(msg)}</div>`;
+    input.value = '';
+
+    setTimeout(() => {
+        const response = getAiResponse(msg);
+        messages.innerHTML += response;
+        messages.scrollTop = messages.scrollHeight;
+    }, 500);
+
+    messages.scrollTop = messages.scrollHeight;
+}
+
+function getAiResponse(input) {
+    const lower = input.toLowerCase();
+    const products = allProducts.filter(p => p.hasStock);
+
+    if (lower.includes('merhaba') || lower.includes('selam') || lower.includes('hey')) {
+        return `<div class="ai-message">Merhaba! Size nasıl yardımcı olabilirim? Spor giyim ürünleri arıyorsanız bana ne tür bir ürün istediğinizi söyleyin! 😊</div>`;
+    }
+
+    if (lower.includes('tayt') || lower.includes('pantolon') || lower.includes('legging')) {
+        const results = products.filter(p => p.name.toLowerCase().includes('tayt') || p.name.toLowerCase().includes('legging') || p.category?.toLowerCase().includes('tayt')).slice(0, 3);
+        if (results.length === 0) return `<div class="ai-message">Şu anda tayt ürünümüz bulunmuyor. Farklı bir kategori aramak ister misiniz?</div>`;
+        return `<div class="ai-message">${results.length} tayt ürünü buldum:<br>${results.map(p => `<span class="product-suggestion" onclick="openProductModal('${p.id}')"><strong>${p.name}</strong><small>${p.brand} - ₺${p.minPrice.toFixed(2)}</small></span>`).join('')}</div>`;
+    }
+
+    if (lower.includes('atlet') || lower.includes('üst') || lower.includes('tişört')) {
+        const results = products.filter(p => p.name.toLowerCase().includes('atlet') || p.name.toLowerCase().includes('tişört') || p.name.toLowerCase().includes('üst') || p.category?.toLowerCase().includes('atlet')).slice(0, 3);
+        if (results.length === 0) return `<div class="ai-message">Şu anda atlet ürünümüz bulunmuyor. Başka bir şey aramak ister misiniz?</div>`;
+        return `<div class="ai-message">${results.length} atlet/üst ürünü buldum:<br>${results.map(p => `<span class="product-suggestion" onclick="openProductModal('${p.id}')"><strong>${p.name}</strong><small>${p.brand} - ₺${p.minPrice.toFixed(2)}</small></span>`).join('')}</div>`;
+    }
+
+    if (lower.includes('siyah') || lower.includes('renk')) {
+        const results = products.filter(p => (p.colors || []).some(c => c.includes('siyah'))).slice(0, 3);
+        if (results.length === 0) return `<div class="ai-message">Siyah ürün bulamadım. Farklı bir renk veya ürün aramak ister misiniz?</div>`;
+        return `<div class="ai-message">İşte siyah renkli ürünler:<br>${results.map(p => `<span class="product-suggestion" onclick="openProductModal('${p.id}')"><strong>${p.name}</strong><small>${p.brand} - ₺${p.minPrice.toFixed(2)}</small></span>`).join('')}</div>`;
+    }
+
+    if (lower.includes('fiyat') || lower.includes('indirim') || lower.includes('ucuz') || lower.includes('kampanya')) {
+        const sorted = [...products].sort((a, b) => a.minPrice - b.minPrice).slice(0, 3);
+        return `<div class="ai-message">En uygun fiyatlı ürünler:<br>${sorted.map(p => `<span class="product-suggestion" onclick="openProductModal('${p.id}')"><strong>${p.name}</strong><small>${p.brand} - ₺${p.minPrice.toFixed(2)}</small></span>`).join('')}</div>`;
+    }
+
+    if (lower.includes('en çok') || lower.includes('popüler') || lower.includes('öne çıkan')) {
+        const featured = products.filter(p => p.featured || p.campaign).slice(0, 3);
+        if (featured.length === 0) {
+            const sorted = [...products].sort((a, b) => (b.variants[0]?.regularPrice || 0) - b.minPrice).slice(0, 3);
+            return `<div class="ai-message">Popüler ürünler:<br>${sorted.map(p => `<span class="product-suggestion" onclick="openProductModal('${p.id}')"><strong>${p.name}</strong><small>${p.brand} - ₺${p.minPrice.toFixed(2)}</small></span>`).join('')}</div>`;
+        }
+        return `<div class="ai-message">Öne çıkan ürünler:<br>${featured.map(p => `<span class="product-suggestion" onclick="openProductModal('${p.id}')"><strong>${p.name}</strong><small>${p.brand} - ₺${p.minPrice.toFixed(2)}</small></span>`).join('')}</div>`;
+    }
+
+    if (lower.includes('beden') || lower.includes('s') || lower.includes('m') || lower.includes('l') || lower.includes('xl')) {
+        const sizeMatch = lower.match(/\b(xs|s|m|l|xl|2xl|3xl)\b/i);
+        if (sizeMatch) {
+            const size = sizeMatch[1].toUpperCase();
+            const results = products.filter(p => (p.sizes || []).includes(size)).slice(0, 3);
+            if (results.length === 0) return `<div class="ai-message">Maalesef ${size} beden ürün bulunamadı. Farklı bir beden aramak ister misiniz?</div>`;
+            return `<div class="ai-message">${size} beden mevcut ürünler:<br>${results.map(p => `<span class="product-suggestion" onclick="openProductModal('${p.id}')"><strong>${p.name}</strong><small>${p.brand} - ₺${p.minPrice.toFixed(2)}</small></span>`).join('')}</div>`;
+        }
+    }
+
+    if (lower.includes('kargo') || lower.includes('teslimat')) {
+        return `<div class="ai-message">500₺ üzeri siparişlerde ücretsiz kargo! 500₺ altı siparişlerde sabit kargo ücreti uygulanmaktadır. Detaylı bilgi için müşteri hizmetleri ile iletişime geçebilirsiniz.</div>`;
+    }
+
+    if (lower.includes('iade') || lower.includes('değişim')) {
+        return `<div class="ai-message">İade ve değişim koşullarımız için "Müşteri Hizmetleri" sayfamızı inceleyebilirsiniz. Genellikle 14 gün içinde iade kabul edilmektedir.</div>`;
+    }
+
+    if (lower.includes('yardım') || lower.includes('ne yapabilirsin') || lower.includes('neler')) {
+        return `<div class="ai-message">Size şu konularda yardımcı olabilirim:<br>• Ürün bulma (tayt, atlet, vb.)<br>• Renk ve beden bazlı arama<br>• Fiyat karşılaştırma<br>• Kampanya bilgileri<br>• Kargo ve iade bilgileri<br><br>Ne aradığınızı yazın, size yardımcı olayım!</div>`;
+    }
+
+    const keywordResults = products.filter(p =>
+        p.name.toLowerCase().includes(lower) ||
+        p.brand.toLowerCase().includes(lower) ||
+        p.category?.toLowerCase().includes(lower) ||
+        p.description?.toLowerCase().includes(lower)
+    ).slice(0, 3);
+
+    if (keywordResults.length > 0) {
+        return `<div class="ai-message">Aradığınızla eşleşen ürünler:<br>${keywordResults.map(p => `<span class="product-suggestion" onclick="openProductModal('${p.id}')"><strong>${p.name}</strong><small>${p.brand} - ₺${p.minPrice.toFixed(2)}</small></span>`).join('')}</div>`;
+    }
+
+    return `<div class="ai-message">Aradığınız kriterlere uygun ürün bulamadım. Farklı bir arama terimi deneyin veya "yardım" yazarak neler yapabileceğimi öğrenin!</div>`;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 function closeModal() {
@@ -536,6 +756,10 @@ document.addEventListener('keydown', function(e) {
         closeModal();
         if (document.getElementById('cartSidebar').classList.contains('active')) {
             toggleCart();
+        }
+        const chatWindow = document.getElementById('aiChatWindow');
+        if (chatWindow && chatWindow.style.display !== 'none') {
+            toggleAiChat();
         }
     }
 });

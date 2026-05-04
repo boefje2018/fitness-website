@@ -106,6 +106,8 @@ function showPage(page, el) {
     if (page === 'statistics') loadStatistics();
     if (page === 'promotions') loadPromotions();
     if (page === 'categories') loadCategoriesAdmin();
+    if (page === 'feeds') loadXmlSettings();
+    if (page === 'settings') loadPaymentSettings();
 }
 
 // ===================== TOAST =====================
@@ -1252,6 +1254,358 @@ function exportToXML() {
     a.click();
     URL.revokeObjectURL(url);
     showToast('XML dosyası indirildi!');
+}
+
+// ===================== XML FORMAT SETTINGS =====================
+function getXmlSettings() {
+    return JSON.parse(localStorage.getItem('xmlSettings') || JSON.stringify({
+        format: 'standard',
+        scope: 'all'
+    }));
+}
+
+function saveXmlSettings() {
+    const format = document.querySelector('input[name="xmlFormat"]:checked')?.value || 'standard';
+    const scope = document.querySelector('input[name="xmlScope"]:checked')?.value || 'all';
+    localStorage.setItem('xmlSettings', JSON.stringify({ format, scope }));
+    showToast('XML ayarları kaydedildi!');
+}
+
+function loadXmlSettings() {
+    const settings = getXmlSettings();
+    const formatRadio = document.querySelector(`input[name="xmlFormat"][value="${settings.format}"]`);
+    const scopeRadio = document.querySelector(`input[name="xmlScope"][value="${settings.scope}"]`);
+    if (formatRadio) formatRadio.checked = true;
+    if (scopeRadio) scopeRadio.checked = true;
+}
+
+function getProductsForExport() {
+    let products = getAllProducts();
+    const settings = getXmlSettings();
+    if (settings.scope === 'pod') {
+        products = products.filter(p => p.category?.toLowerCase().includes('pod') || p.name?.toLowerCase().includes('pod') || (p.description || '').toLowerCase().includes('print on demand'));
+    }
+    return products;
+}
+
+function exportSelectedXml() {
+    const settings = getXmlSettings();
+    const products = getProductsForExport();
+    let xml = '';
+
+    switch (settings.format) {
+        case 'standard':
+            xml = exportStandardXml(products);
+            break;
+        case 'stockmount':
+            xml = exportStockMountXml(products);
+            break;
+        case 'ticimax':
+            xml = exportTicimaxXml(products);
+            break;
+        case 'ideasoft':
+            xml = exportIdeaSoftXml(products);
+            break;
+    }
+
+    const blob = new Blob([xml], { type: 'application/xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `feed-${settings.format}-${new Date().toISOString().slice(0, 10)}.xml`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(`${settings.format.toUpperCase()} formatında ${products.length} ürün dışa aktarıldı!`);
+}
+
+function exportStandardXml(products) {
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<products>\n';
+    products.forEach(p => {
+        xml += `  <parent>\n`;
+        xml += `    <item_group_id>${p.id}</item_group_id>\n`;
+        xml += `    <name>${p.name}</name>\n`;
+        xml += `    <brand>${p.brand}</brand>\n`;
+        xml += `    <description><![CDATA[${p.description || ''}]]></description>\n`;
+        xml += `    <category>${p.category || ''}</category>\n`;
+        xml += `    <main>${p.mainImage || ''}</main>\n`;
+        xml += `    <created_at>${p.createdAt || new Date().toISOString()}</created_at>\n`;
+        (p.variants || []).forEach(v => {
+            xml += `    <variant>\n`;
+            xml += `      <id>${v.id}</id>\n`;
+            xml += `      <sku>${v.sku || ''}</sku>\n`;
+            xml += `      <price>${v.price || p.minPrice}</price>\n`;
+            xml += `      <regular_price>${v.regularPrice || p.minPrice}</regular_price>\n`;
+            xml += `      <stock_status>${v.stockStatus || 'instock'}</stock_status>\n`;
+            xml += `      <stock_qty>${v.stockQty || 0}</stock_qty>\n`;
+            xml += `      <attribute name="Beden">${v.bed || ''}</attribute>\n`;
+            xml += `      <attribute name="Renk">${v.renk || ''}</attribute>\n`;
+            xml += `      <image>${v.image || p.mainImage || ''}</image>\n`;
+            xml += `    </variant>\n`;
+        });
+        xml += `  </parent>\n`;
+    });
+    xml += '</products>';
+    return xml;
+}
+
+function exportStockMountXml(products) {
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<Products>\n';
+    products.forEach(p => {
+        xml += `  <Product>\n`;
+        xml += `    <Code>${p.id}</Code>\n`;
+        xml += `    <Name>${p.name}</Name>\n`;
+        xml += `    <Brand>${p.brand}</Brand>\n`;
+        xml += `    <Category>${p.category || 'Genel'}</Category>\n`;
+        xml += `    <Description><![CDATA[${p.description || ''}]]></Description>\n`;
+        xml += `    <Price>${p.minPrice}</Price>\n`;
+        xml += `    <VatRate>${p.taxRate || 18}</VatRate>\n`;
+        xml += `    <Stock>${p.stockQty || 0}</Stock>\n`;
+        xml += `    <ImageUrl>${p.mainImage || ''}</ImageUrl>\n`;
+        (p.galleryImages || []).forEach((img, i) => {
+            xml += `    <ImageUrl${i + 1}>${img}</ImageUrl${i + 1}>\n`;
+        });
+        xml += `    <Status>active</Status>\n`;
+        xml += `  </Product>\n`;
+    });
+    xml += '</Products>';
+    return xml;
+}
+
+function exportTicimaxXml(products) {
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<Products>\n';
+    products.forEach(p => {
+        xml += `  <Product>\n`;
+        xml += `    <ProductCode>${p.id}</ProductCode>\n`;
+        xml += `    <ProductName>${p.name}</ProductName>\n`;
+        xml += `    <BrandCode>${p.brand}</BrandCode>\n`;
+        xml += `    <CategoryCode>${p.categorySlug || p.category || 'genel'}</CategoryCode>\n`;
+        xml += `    <Description><![CDATA[${p.description || ''}]]></Description>\n`;
+        xml += `    <ListPrice>${p.minPrice}</ListPrice>\n`;
+        xml += `    <Price>${p.campaignPrice || p.minPrice}</Price>\n`;
+        xml += `    <VatRate>${p.taxRate || 18}</VatRate>\n`;
+        xml += `    <StockQuantity>${p.stockQty || 0}</StockQuantity>\n`;
+        xml += `    <Image1>${p.mainImage || ''}</Image1>\n`;
+        (p.galleryImages || []).slice(0, 4).forEach((img, i) => {
+            xml += `    <Image${i + 2}>${img}</Image${i + 2}>\n`;
+        });
+        xml += `    <IsActive>true</IsActive>\n`;
+        xml += `  </Product>\n`;
+    });
+    xml += '</Products>';
+    return xml;
+}
+
+function exportIdeaSoftXml(products) {
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<Products>\n';
+    products.forEach(p => {
+        xml += `  <Product>\n`;
+        xml += `    <ProductID>${p.id}</ProductID>\n`;
+        xml += `    <ProductName>${p.name}</ProductName>\n`;
+        xml += `    <Brand>${p.brand}</Brand>\n`;
+        xml += `    <CategoryName>${p.category || 'Genel'}</CategoryName>\n`;
+        xml += `    <Description><![CDATA[${p.description || ''}]]></Description>\n`;
+        xml += `    <NormalPrice>${p.minPrice}</NormalPrice>\n`;
+        xml += `    <Price>${p.campaignPrice || p.minPrice}</Price>\n`;
+        xml += `    <Tax>${p.taxRate || 18}</Tax>\n`;
+        xml += `    <Stock>${p.stockQty || 0}</Stock>\n`;
+        xml += `    <MainImage>${p.mainImage || ''}</MainImage>\n`;
+        (p.galleryImages || []).forEach(img => {
+            xml += `    <Image>${img}</Image>\n`;
+        });
+        xml += `    <Status>1</Status>\n`;
+        xml += `  </Product>\n`;
+    });
+    xml += '</Products>';
+    return xml;
+}
+
+async function importXmlFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    showToast('XML dosyası işleniyor...', 'info');
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        try {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(event.target.result, 'text/xml');
+
+            const parseError = xmlDoc.querySelector('parsererror');
+            if (parseError) {
+                showToast('Geçersiz XML dosyası!', 'error');
+                return;
+            }
+
+            let products = [];
+
+            if (xmlDoc.querySelector('parent')) {
+                products = parseXMLProducts(xmlDoc);
+            } else if (xmlDoc.querySelector('Products')) {
+                products = parseGenericProducts(xmlDoc);
+            } else if (xmlDoc.querySelector('products')) {
+                products = parseGenericProducts(xmlDoc);
+            }
+
+            if (products.length === 0) {
+                showToast('XML dosyasında ürün bulunamadı!', 'error');
+                return;
+            }
+
+            const feedId = 'manual-import-' + Date.now();
+            products.forEach(p => { p.feedId = feedId; });
+
+            const existing = JSON.parse(localStorage.getItem('adminProducts') || '[]');
+            localStorage.setItem('adminProducts', JSON.stringify([...existing, ...products]));
+
+            const feeds = getFeeds();
+            feeds.push({
+                id: feedId,
+                name: 'İçe Aktar: ' + file.name,
+                url: 'local://' + file.name,
+                active: true,
+                lastLoaded: new Date().toISOString(),
+                status: 'loaded',
+                productCount: products.length
+            });
+            saveFeeds(feeds);
+
+            showToast(`${products.length} ürün XML dosyasından yüklendi!`);
+            loadFeeds();
+            loadDashboard();
+        } catch (error) {
+            showToast('XML dosyası işlenirken hata: ' + error.message, 'error');
+        }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+}
+
+function parseGenericProducts(xmlDoc) {
+    const productEls = xmlDoc.querySelectorAll('Product, product, parent');
+    const products = [];
+
+    productEls.forEach(el => {
+        const id = getTextSafe(el, 'id, ProductID, Code, ProductCode, item_group_id');
+        const name = getTextSafe(el, 'name, ProductName, Name');
+        const brand = getTextSafe(el, 'brand, Brand, BrandCode');
+        const category = getTextSafe(el, 'category, CategoryName, Category');
+        const description = getTextSafe(el, 'description, Description');
+        const price = parseFloat(getTextSafe(el, 'price, Price, ListPrice, NormalPrice')) || 0;
+        const stock = parseInt(getTextSafe(el, 'stock, Stock, StockQuantity')) || 0;
+        const image = getTextSafe(el, 'image, ImageUrl, Image1, MainImage, main');
+        const taxRate = parseFloat(getTextSafe(el, 'tax, Tax, VatRate')) || 18;
+
+        const variants = [];
+        const variantEls = el.querySelectorAll('variant, Variant');
+        variantEls.forEach(v => {
+            variants.push({
+                id: getTextSafe(v, 'id, ID'),
+                sku: getTextSafe(v, 'sku, SKU'),
+                price: parseFloat(getTextSafe(v, 'price, Price')) || price,
+                regularPrice: parseFloat(getTextSafe(v, 'regular_price, ListPrice')) || price,
+                stockStatus: getTextSafe(v, 'stock_status, StockStatus') || (stock > 0 ? 'instock' : 'outofstock'),
+                stockQty: parseInt(getTextSafe(v, 'stock_qty, StockQuantity')) || stock,
+                bed: getTextSafe(v, 'bed, Beden, Size'),
+                renk: getTextSafe(v, 'renk, Renk, Color'),
+                image: getTextSafe(v, 'image, Image')
+            });
+        });
+
+        const galleryImages = [];
+        el.querySelectorAll('Image, ImageUrl, gallery image').forEach(img => {
+            if (img.textContent.trim()) galleryImages.push(img.textContent.trim());
+        });
+
+        const colors = new Set();
+        const sizes = new Set();
+        variants.forEach(v => {
+            if (v.renk) colors.add(v.renk.toLowerCase());
+            if (v.bed) sizes.add(v.bed);
+        });
+
+        const sizeOrder = ['XXS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'];
+        const sortedSizes = Array.from(sizes).sort((a, b) => {
+            const ia = sizeOrder.indexOf(a.toUpperCase()), ib = sizeOrder.indexOf(b.toUpperCase());
+            return (ia === -1 && ib === -1) ? a.localeCompare(b) : ia === -1 ? 1 : ib === -1 ? -1 : ia - ib;
+        });
+
+        products.push({
+            id: id || 'imported-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+            name: name || 'İsimsiz Ürün',
+            brand: brand || 'Bilinmeyen',
+            category: category || '',
+            categorySlug: (category || '').toLowerCase().replace(/\s+/g, '-'),
+            description: description || '',
+            mainImage: image || '',
+            galleryImages: galleryImages,
+            videoUrl: '',
+            createdAt: new Date().toISOString(),
+            variants: variants.length > 0 ? variants : [{
+                id: 'v-' + Date.now(),
+                sku: '',
+                price: price,
+                regularPrice: price,
+                stockStatus: stock > 0 ? 'instock' : 'outofstock',
+                stockQty: stock,
+                bed: '',
+                renk: '',
+                image: image
+            }],
+            colors: Array.from(colors),
+            sizes: sortedSizes,
+            minPrice: price,
+            hasStock: stock > 0,
+            stockQty: stock,
+            source: 'xml',
+            featured: false,
+            campaign: false,
+            campaignPrice: null,
+            taxRate: taxRate
+        });
+    });
+
+    return products;
+}
+
+function getTextSafe(el, selectors) {
+    for (const sel of selectors.split(', ')) {
+        const found = el.querySelector(sel);
+        if (found && found.textContent.trim()) return found.textContent.trim();
+    }
+    return '';
+}
+
+// ===================== PAYMENT SETTINGS =====================
+function getPaymentSettings() {
+    return JSON.parse(localStorage.getItem('paymentSettings') || JSON.stringify({
+        whatsapp: true,
+        email: true,
+        door: true,
+        bank: false
+    }));
+}
+
+function savePaymentSettings() {
+    const settings = {
+        whatsapp: document.getElementById('payWhatsapp')?.checked || false,
+        email: document.getElementById('payEmail')?.checked || false,
+        door: document.getElementById('payDoor')?.checked || false,
+        bank: document.getElementById('payBank')?.checked || false
+    };
+    localStorage.setItem('paymentSettings', JSON.stringify(settings));
+    showToast('Ödeme ayarları kaydedildi!');
+}
+
+function loadPaymentSettings() {
+    const settings = getPaymentSettings();
+    const payWhatsapp = document.getElementById('payWhatsapp');
+    const payEmail = document.getElementById('payEmail');
+    const payDoor = document.getElementById('payDoor');
+    const payBank = document.getElementById('payBank');
+    if (payWhatsapp) payWhatsapp.checked = settings.whatsapp;
+    if (payEmail) payEmail.checked = settings.email;
+    if (payDoor) payDoor.checked = settings.door;
+    if (payBank) payBank.checked = settings.bank;
 }
 
 initAdmin();
