@@ -648,9 +648,7 @@ function completeOrder() {
     orders.push(order);
     localStorage.setItem('orders', JSON.stringify(orders));
 
-    if (window.sendOrderWebhook) {
-        window.sendOrderWebhook(order);
-    }
+    sendOrderWebhook(order);
 
     switch (paymentMethod) {
         case 'whatsapp':
@@ -715,6 +713,20 @@ function showToast(message, type = 'success') {
     toast.textContent = message;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
+}
+
+async function sendOrderWebhook(order) {
+    const webhookSettings = JSON.parse(localStorage.getItem('webhookSettings') || '{}');
+    if (!webhookSettings.url) return;
+    try {
+        await fetch(webhookSettings.url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Webhook-Secret': webhookSettings.secret || '' },
+            body: JSON.stringify({ event: 'order_created', order, timestamp: new Date().toISOString() })
+        });
+    } catch (error) {
+        console.error('Webhook gönderim hatası:', error);
+    }
 }
 
 // ===================== AI CHAT =====================
